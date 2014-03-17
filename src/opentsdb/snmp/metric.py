@@ -38,7 +38,7 @@ class Metric:
             buf.push(key+"="+val)
         if len(buf) > 0:
             return " "+buf.join(" ")
-        else
+        else:
             return""
 
     def _get_get(self):
