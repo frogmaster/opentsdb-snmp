@@ -16,30 +16,31 @@ class Metric:
             self.walk = True
 
     def _get_walk(self):
-        data = self.snmp.walk(oid)
+        data = self.snmp.walk(self.oid)
         return data
 
     def _process_walk_data(self, data):
         buf = []
         for idx, dp in data.items():
-            buf.push(self._process_dp(dp, idx))
+            buf.append(self._process_dp(dp, idx))
         return buf
 
     def _process_dp(self, dp, key=None):
         tags = self.tags
         if (key):
-            tags = tags + self.resolver(key)
+            tags = dict(tags.items() + self.resolver().resolve(key).items())
         tags["host"] = self.host
-        buf = "put "+self.name+" "+time.time()+" "+dp+self._tags_to_str(tags)
+        buf = "put {0} {1} {2} {3}".format(self.name, int(time.time()), dp, self._tags_to_str(tags))
+        return buf
 
     def _tags_to_str(self, tagsdict):
         buf = []
         for key, val in tagsdict.items():
-            buf.push(key+"="+val)
+            buf.append(str(key)+"="+str(val))
         if len(buf) > 0:
-            return " "+buf.join(" ")
+            return ' '.join(buf)
         else:
-            return""
+            return ""
 
     def _get_get(self):
         data = self.snmp.get(oid)
