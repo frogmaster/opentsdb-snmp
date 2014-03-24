@@ -1,5 +1,6 @@
 import time
 
+
 class Metric:
     'Metric class'
     def __init__(self, data, snmp, resolvers=None, host=None):
@@ -7,7 +8,7 @@ class Metric:
         self.tags = data["tags"]
         self.oid = data["oid"]
         self.host = host
-        if data["resolver"] and resolvers.has_key(data["resolver"]):
+        if data["resolver"] and data["resolver"] in resolvers:
             self.resolver = resolvers[data["resolver"]]
         else:
             self.resolver = resolvers["default"]
@@ -30,20 +31,23 @@ class Metric:
         if (key):
             tags = dict(tags.items() + self.resolver().resolve(key).items())
         tags["host"] = self.host
-        buf = "put {0} {1} {2} {3}".format(self.name, int(time.time()), dp, self._tags_to_str(tags))
+        tagstr = self._tags_to_str(tags)
+        buf = "put {0} {1} {2} {3}".format(
+            self.name, int(time.time()), dp, tagstr
+        )
         return buf
 
     def _tags_to_str(self, tagsdict):
         buf = []
         for key, val in tagsdict.items():
-            buf.append(str(key)+"="+str(val))
+            buf.append(str(key) + "=" + str(val))
         if len(buf) > 0:
             return ' '.join(buf)
         else:
             return ""
 
     def _get_get(self):
-        data = self.snmp.get(oid)
+        data = self.snmp.get(self.oid)
         return data
 
     def get_opentsdb_commands(self):
