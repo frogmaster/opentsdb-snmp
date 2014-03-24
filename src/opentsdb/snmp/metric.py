@@ -8,13 +8,15 @@ class Metric:
         self.tags = data["tags"]
         self.oid = data["oid"]
         self.host = host
-        if data["resolver"] and data["resolver"] in resolvers:
-            self.resolver = resolvers[data["resolver"]]
-        else:
-            self.resolver = resolvers["default"]
-        self.snmp = snmp
         if data["type"] == "walk":
             self.walk = True
+            if data["resolver"] and data["resolver"] in resolvers:
+                self.resolver = resolvers[data["resolver"]]
+            else:
+                self.resolver = resolvers["default"]
+        else:
+            self.walk=False
+        self.snmp = snmp
 
     def _get_walk(self):
         data = self.snmp.walk(self.oid)
@@ -52,4 +54,8 @@ class Metric:
 
     def get_opentsdb_commands(self):
         if self.walk:
-            NotImplemented
+            raw = self._get_walk()
+            return self._process_walk_data(raw)
+        else:
+            raw = self._get_get()
+            return [self._process_dp(raw)]

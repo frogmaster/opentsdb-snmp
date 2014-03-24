@@ -4,26 +4,28 @@ from mock import Mock, patch
 from opentsdb.snmp.device import Device, default_resolver
 from opentsdb.snmp.metric import Metric
 
+
 class TestDevice(object):
     def setup(self):
         d = {
-                'hostname': 'foobar',
-                'community': 'public',
-                'snmp_version': 2,
-                'metrics': [
-                    {
-                        'metric': 'interface.packets',
-                        'oid': '.1.3.6.1.2.1.31.1.1.1.9',
-                        'type': 'walk',
-                        'tags': {
-                            'direction': "in",
-                            'type': 'broadcast'
-                            },
-                        'resolver': 'cisco_ifname'
-                        }
-                    ]
+            'hostname': 'foobar',
+            'community': 'public',
+            'snmp_version': 2,
+            'metrics': [
+                {
+                    'metric': 'interface.packets',
+                    'oid': '.1.3.6.1.2.1.31.1.1.1.9',
+                    'type': 'walk',
+                    'tags': {
+                        'direction': "in",
+                        'type': 'broadcast'
+                    },
+                    'resolver': 'cisco_ifname'
                 }
+            ]
+        }
         self.tested = Device(d)
+
     def teardown(self):
         self.tested = None
 
@@ -37,34 +39,82 @@ class TestDevice(object):
         eq_('123', tags["index"])
         eq_('3', tags["index2"])
 
+
 class TestMetric(object):
     def setup(self):
-        mdata = {
-                'metric': 'interface.packets',
-                'oid': '.1.3.6.1.2.1.31.1.1.1.9',
-                'type': 'walk',
-                'tags': {
-                    'direction': "in",
-                    'type': 'broadcast'
-                    },
-                'resolver': 'cisco_ifname'
-                }
         snmp = Mock()
         snmp.walk = Mock(return_value={
             "1": 10,
             "2": 20,
         })
-        self.tested = Metric(data=mdata, snmp=snmp, resolvers={'default': default_resolver}, host="foo")
+        snmp.get = Mock(return_value=123)
+        self.snmpmock = snmp
         self.time = time.time()
 
     @patch('time.time')
     def test_opentsdb_walk_metric(self, mocktime):
-        m = self.tested
         mocktime.return_value = self.time
+        mdata = {
+            'metric': 'interface.packets',
+            'oid': '.1.3.6.1.2.1.31.1.1.1.9',
+            'type': 'walk',
+            'tags': {
+                'direction': "in",
+                'type': 'broadcast'
+            },
+            'resolver': 'cisco_ifname'
+        }
+        m = Metric(
+            data=mdata,
+            snmp=self.snmpmock,
+            resolvers={'default': default_resolver},
+            host="foo"
+        )
         walkdata = m._get_walk()
         eq_(10, walkdata["1"])
         eq_(20, walkdata["2"])
-        eq_("put interface.packets "+str(int(self.time))+" 20 index=2 direction=in type=broadcast host=foo", m._process_dp(20, 2))
+        eq_(
+            "put interface.packets "
+            + str(int(self.time)) +
+            " 20 index=2 direction=in type=broadcast host=foo",
+            m._process_dp(20, 2)
+        )
         result = m._process_walk_data(walkdata)
         eq_(2, len(result))
-        eq_('put interface.packets '+str(int(self.time))+' 10 index=1 direction=in type=broadcast host=foo', result[0])
+        eq_(
+            'put interface.packets '
+            + str(int(self.time)) +
+            ' 10 index=1 direction=in type=broadcast host=foo',
+            result[0]
+        )
+        result = m.get_opentsdb_commands()
+        eq_(2, len(result))
+        eq_(
+            'put interface.packets '
+            + str(int(self.time)) +
+            ' 10 index=1 direction=in type=broadcast host=foo',
+            result[0]
+        )
+
+    @patch('time.time')
+    def test_opentsdb_get_metric(self, mocktime):
+        mocktime.return_value = self.time
+        mdata = {
+            'metric': 'cpmCPUTotal5minRev',
+            'oid': '.1.3.6.1.4.1.9.9.109.1.1.1.1.8',
+            'type': 'get',
+            'tags': {},
+        }
+        m = Metric(
+            data=mdata,
+            snmp=self.snmpmock,
+            resolvers={'default': default_resolver},
+            host='foo'
+        )
+        result = m.get_opentsdb_commands()[0]
+        eq_(
+            "put cpmCPUTotal5minRev "
+            + str(int(self.time)) +
+            " 123 host=foo",
+            result
+        )
