@@ -10,12 +10,12 @@ class Metric:
         self.host = host
         if data["type"] == "walk":
             self.walk = True
-            if data["resolver"] and data["resolver"] in resolvers:
+            if "resolver" in data and data["resolver"] in resolvers:
                 self.resolver = resolvers[data["resolver"]]
             else:
                 self.resolver = resolvers["default"]
         else:
-            self.walk=False
+            self.walk = False
         self.snmp = snmp
 
     def _get_walk(self):
