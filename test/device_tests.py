@@ -20,10 +20,11 @@ class TestDevice(object):
                         'direction': "in",
                         'type': 'broadcast'
                     },
-                    'resolver': 'cisco_ifname'
                 }
             ]
         }
+        self.tested = Device(d)
+        d["metrics"][0]["resolver"] = "default"
         self.tested = Device(d)
 
     def teardown(self):
@@ -70,6 +71,8 @@ class TestMetric(object):
             resolvers={'default': default_resolver},
             host="foo"
         )
+        #test _tags_to_str with empty tags
+        eq_("", m._tags_to_str({}))
         walkdata = m._get_walk()
         eq_(10, walkdata["1"])
         eq_(20, walkdata["2"])
