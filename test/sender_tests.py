@@ -1,9 +1,10 @@
-from nose.tools import ok_
+from nose.tools import ok_, eq_
 import opentsdb.snmp.sender as sender
 import time
 from mock import patch, Mock
 from Queue import Queue
 import socket
+import signal
 
 
 class TestDSDConnection(object):
@@ -16,6 +17,7 @@ class TestDSDConnection(object):
         with patch('socket.getaddrinfo') as mockaddr:
             mockaddr.side_effect = socket.error
             ok_(self.tsd._get_connected_socket() is None)
+
         with patch('socket.socket') as mocksock:
             mocksock.connect = Mock()
             mocksock.return_value = mocksock
@@ -24,19 +26,45 @@ class TestDSDConnection(object):
             mocksock.connect.side_effect = socket.error
             ok_(self.tsd._get_connected_socket() is None)
 
-    def test_verify(self):
+    def test_connect_verify(self):
         #return false when there's no socket
         ok_(self.tsd.verify() is False)
         #return true when check time is less than 60s
         self.tsd.socket = Mock()
         self.tsd.last_verify = time.time()
         ok_(self.tsd.verify() is True)
-        #pass last_verify, try sockets
-        self.tsd.socket.recv = Mock(return_value="test string")
+
         cur_verify_time = time.time() - 60
         self.tsd.last_verify = cur_verify_time
-        ok_(self.tsd.verify())
+
+        #pass last_verify, try sockets
+        self.tsd.socket.recv = Mock(return_value="test string")
+        #should pass
+        ok_(self.tsd.verify() is True)
         ok_(self.tsd.last_verify > cur_verify_time)
+
+        self.tsd.last_verify = cur_verify_time
+        #should fail and set socket to none because buf is empty
+        self.tsd.socket.recv.return_value = None
+        ok_(self.tsd.verify() is False)
+        ok_(self.tsd.socket is None)
+
+        self.tsd.socket = Mock()
+        self.tsd.socket.recv = Mock()
+
+        #fail when error is raised during recv
+        self.tsd.socket.recv.side_effect = socket.error
+        ok_(self.tsd.verify() is False)
+
+        #connect should return immediately
+        with timeout(seconds=1):
+            self.tsd.socket = Mock()
+            self.tsd.last_verify = time.time()
+            self.tsd.connect()
+#should test connect with retries, but i currently don't see an easy way
+#        with timeout(seconds=2):
+#            with patch(self.tsd._get_connected_socket) as mockgetsoc:
+#                mockgetsoc.side_effect =
 
     def test_send_data(self):
         self.tsd.socket = Mock()
@@ -73,20 +101,29 @@ class TestSenderThread(object):
 
 
 
+class TestSenderManager(object):
+    @patch('opentsdb.snmp.sender.SenderThread')
+    def test_sm_run(self, mocksender):
+        tsd_list = [("localhost", 54321)]
+        q = Queue()
+        self.sm = sender.SenderManager(squeue=q, tsd_list=tsd_list)
+        eq_(1, len(self.sm.workers))
+        #w = self.sm.workers[0]
+        self.sm.run()
+        self.sm.stop()
 
 
+class timeout:
+    def __init__(self, seconds=1, error_message='Timeout'):
+        self.seconds = seconds
+        self.error_message = error_message
 
+    def handle_timeout(self, signum, frame):
+        raise Exception(self.error_message)
 
-#class TestSenderManager(object):
-#
-#    def setup(self):
-#        q = Queue()
-#        tsd_list = [("localhost", 54321)]
-#        self.sm = SenderManager(squeue=q, tsd_list=tsd_list)
-#
-#    @patch('opentsdb.snmp.sender.SenderThread')
-#    def test_sm_run(self, mocksender):
-#        eq_(1, len(self.sm.workers))
-#        w = self.sm.workers[0]
-#        self.sm.run()
-#        self.sm.stop()
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.handle_timeout)
+        signal.alarm(self.seconds)
+
+    def __exit__(self, type, value, traceback):
+        signal.alarm(0)

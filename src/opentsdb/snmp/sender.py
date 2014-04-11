@@ -37,7 +37,6 @@ class TSDConnection:
         self.socket = None
         self.host = host
         self.port = port
-        self._stop = False
         self.last_verify = 0
 
     def _get_connected_socket(self):
@@ -66,17 +65,10 @@ class TSDConnection:
                 return None
 
     def connect(self):
-        try_delay = 1
-        while not self._stop:
-            if self.verify():
-                return
-            try_delay *= 1 + random.random()
-            if try_delay > 600:
-                try_delay *= 0.5
-                time.sleep(try_delay)
-            self.socket = self._get_connected_socket()
-            if self.socket:
-                return self
+        self.socket = self._get_connected_socket()
+        if self.socket:
+            return True
+        return False
 
     def verify(self):
         """Periodically verify that our connection to the TSD is OK
@@ -98,7 +90,8 @@ class TSDConnection:
             return False
 
         bufsize = 4096
-        while not self._stop:
+        #dont loop more than 10 times
+        for _ in range(10):
             # try to read as much data as we can.  at some point this is going
             # to block, but we have set the timeout low when we made the
             # connection
@@ -111,7 +104,7 @@ class TSDConnection:
             # If we don't get a response to the `version' request, the TSD
             # must be dead or overloaded.
             if not buf:
-                self.tsd = None
+                self.socket = None
                 return False
 
             # Woah, the TSD has a lot of things to tell us...  Let's make
@@ -124,10 +117,6 @@ class TSDConnection:
         # if we get here, we assume the connection is good
         self.last_verify = time.time()
         return True
-
-    def stop(self):
-        self.stop = True
-        self.socket = False
 
     def send_data(self, data):
         out = ''
@@ -168,9 +157,11 @@ class SenderThread(threading.Thread):
 
     def stop(self):
         self._stop = True
+        if self.tsd:
+            self.tsd.socket = None
 
     def _mainloop(self):
-        self.tsd.connect()
+        self.connect()
         senddata = []
         while True:
             try:
@@ -188,3 +179,15 @@ class SenderThread(threading.Thread):
     def run(self):
         while not self._stop:
             self._mainloop()
+
+    def connect(self):
+        try_delay = 1
+        while not self._stop:
+            if self.tsd.verify():
+                return True
+            try_delay *= 1 + random.random()
+            if try_delay > 600:
+                try_delay *= 0.5
+                time.sleep(try_delay)
+            if self.tsd.connect():
+                return True
