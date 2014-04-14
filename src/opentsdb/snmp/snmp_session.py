@@ -1,25 +1,26 @@
 from netsnmp import Session, Varbind, VarList
 
+
 class SNMPSession:
     def __init__(self, host, community, version=2):
-        self.session = None;
+        self.session = None
         self.host = host
         self.community = community
         self.version = version
-        
+
     def connect(self):
         self.session = Session(
-                DestHost  = self.host,
-                Community = self.community,
-                Version   = self.version
-                )
+            DestHost=self.host,
+            Community=self.community,
+            Version=self.version
+        )
 
     def walk(self, oid, stripoid=True):
         if not self.session:
             self.connect()
 
         vb = Varbind(oid)
-        vl = VarList(vl)
+        vl = VarList(vb)
         self.session.walk(vl)
         ret = {}
         for v in vl:
@@ -31,9 +32,8 @@ class SNMPSession:
                 full_oid = full_oid.replace(".", '')
             ret[full_oid] = v.val
         return ret
-    
+
     def get(self, oid):
         if not self.session:
             self.connect()
         return self.session.get(oid)[0]
-

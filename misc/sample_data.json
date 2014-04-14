@@ -1,4 +1,13 @@
 {
+    "tsd": [
+        {
+            "host": "localhost",
+            "port": 5431
+        },
+        {
+            "host": "localhost"
+        }
+    ],
     "devices": [
         {
             "hostname": "foobar",

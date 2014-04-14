@@ -2,7 +2,7 @@ from Queue import Queue, Empty
 from time import sleep
 import threading
 from opentsdb.snmp.device import Device
-from opentsdb.snmp.sender import SenderThread
+from opentsdb.snmp.sender import SenderManager
 import json
 import sys
 
@@ -15,41 +15,53 @@ class Main:
         self.readerq = Queue()
         self.senderq = Queue()
         self.readers = readers
-        self.host_list = host_list
-        self.pool = []
-        self.sender = SenderThread(self.senderq)
+        self.conf = ConfigReader(host_list)
+        self.sender_manger = SenderManager(squeue=self.senderq, tsd_list=self.conf.tsd_list)
 
     def init_readers(self):
-        for i in range(1, self.readers):
-            readq = ReaderThread(self.readerq, self.senderq)
-            readq.start()
-            self.pool.append(readq)
+        self.pool = []
+        for i in range(0, self.readers):
+            readth = ReaderThread(self.readerq, self.senderq)
+            readth.start()
+            self.pool.append(readth)
 
-    def run(self):
+    def run(self, once):
         self.init_readers()
-        hlr = ConfigReader(self.host_list)
-        devices = hlr.load_devices()
+        devices = self.conf.devices
         while(True):
             """fill reader queue"""
             for d in devices:
                 self.readerq.put(d)
             self.readerq.join()
+            if (once):
+                break
 
 
 class ConfigReader:
     def __init__(self, path):
         self.path = path
-        self.devices = []
+        self.data = self.load_file(path)
+        self.load_devices()
+        self.load_tsd_list()
 
-    def load_file(self):
-        with open(self.path) as fp:
+    def load_file(self, path):
+        with open(path) as fp:
             return json.load(fp)
 
     def load_devices(self):
-        data = self.load_devices()
-        for d in data["devices"]:
+        self.devices = []
+        for d in self.data["devices"]:
             self.devices.append(Device(d))
         return self.devices
+
+    def load_tsd_list(self):
+        self.tsd_list = []
+        for tsd in self.data["tsd"]:
+            port = 4242
+            if "port" in tsd:
+                port = tsd["port"]
+            self.tsd_list.append((tsd["host"], port))
+        return self.tsd_list
 
 
 class ReaderThread(threading.Thread):
