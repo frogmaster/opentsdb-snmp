@@ -5,9 +5,32 @@ from opentsdb.snmp.device import Device
 from opentsdb.snmp.sender import SenderManager
 import json
 import sys
+import argparse
 
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "-c", "--config", dest="conffile",
+    help="Location of configuration file"
+)
+
+parser.add_argument(
+    "-r", "--readers", dest="readers", default=5,
+    help="Number of reader threads, default 5"
+)
+
+
+def run():
+    args = parser.parse_args()
+
+    if not args.conffile:
+        raise SystemExit("Must specify configuration file with --config")
+
+    app = Main(readers=args.readers, host_list=args.conffile)
+    app.run()
 
 
 class Main:
@@ -16,7 +39,10 @@ class Main:
         self.senderq = Queue()
         self.readers = readers
         self.conf = ConfigReader(host_list)
-        self.sender_manger = SenderManager(squeue=self.senderq, tsd_list=self.conf.tsd_list)
+        self.sender_manger = SenderManager(
+            squeue=self.senderq,
+            tsd_list=self.conf.tsd_list
+        )
 
     def init_readers(self):
         self.pool = []
