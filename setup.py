@@ -13,9 +13,9 @@ setuptools.setup(
     name="opentsdb.snmp",
     version=version.get_git_version(),
     install_requires=[
-        "netsnmp"
+        "netsnmp-python"
     ],
-    test_require=[
+    tests_require=[
         "nose>=1.0",
         "mock>=0.8."
     ],
@@ -25,9 +25,10 @@ setuptools.setup(
         ],
         "resolvers": [
             "default=opentsdb.snmp.resolvers.default:Default",
-            "ifname=opentsdb.snmp.resolvers.ifname:IfName"
+            "ifname=opentsdb.snmp.resolvers.ifname:IfName",
+            "direction_after_idx=opentsdb.snmp.resolvers.after_idx:AfterIndex",
         ]
-
-    }
+    },
+    test_suite="nose.collector",
 
 )

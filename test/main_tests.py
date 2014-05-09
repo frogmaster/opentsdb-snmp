@@ -12,9 +12,9 @@ class TestConfigReader(object):
         loaded_data = self.hlr.load_file(self.hlr.path)
         ok_("devices" in loaded_data)
 
-    def test_load_devices(self):
-        devices = self.hlr.load_devices()
-        eq_("foobar", devices[0].hostname)
+    def test_devicelist(self):
+        devices = self.hlr.devicelist()
+        eq_("foobar", devices[0]["hostname"])
 
     def test_load_tsd_list(self):
         tsd_list = self.hlr.load_tsd_list()
@@ -41,6 +41,7 @@ class TestReaderThread(object):
         self.rthread.stop()
         self.rthread.join()
 
+
 class TestMain(object):
     def setup(self):
         self.mainobj = app.Main(readers=1, host_list="misc/sample_data.json")
@@ -52,12 +53,17 @@ class TestMain(object):
         self.mainobj.pool = []
 
     def test_run(self):
-        self.mainobj.conf.devices[0] = Mock()
-        self.mainobj.conf.devices[0].poll = Mock(return_value=[])
-        self.mainobj.run(True)
+        self.mainobj.load_devices()
+        # load_devices is called in run method,
+        # so devices get's overwritten unless mocked
+        self.mainobj.load_devices = Mock()
 
-    def teardown(self):
+        self.mainobj.devices[0] = Mock()
+        self.mainobj.devices[0].poll = Mock(return_value=[])
+        self.mainobj.run(True)
         for i in self.mainobj.pool:
             i.stop()
-        self.mainobj.sender_manger.stop()
 
+    def test_init_senders(self):
+        self.mainobj.init_senders()
+        self.mainobj.sender_manger.stop()

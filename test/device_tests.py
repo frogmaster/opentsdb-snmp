@@ -1,7 +1,8 @@
 import time
 from nose.tools import eq_
 from mock import Mock, patch
-from opentsdb.snmp.device import Device, default_resolver
+from opentsdb.snmp.main import Main
+from opentsdb.snmp.device import Device
 from opentsdb.snmp.metric import Metric
 
 
@@ -23,9 +24,11 @@ class TestDevice(object):
                 }
             ]
         }
-        self.tested = Device(d)
+        main = Main()
+        main.load_resolvers
+        self.tested = Device(d, main.resolvers)
         d["metrics"][0]["resolver"] = "default"
-        self.tested = Device(d)
+        self.tested = Device(d, main.resolvers)
 
     def teardown(self):
         self.tested = None
@@ -33,12 +36,6 @@ class TestDevice(object):
     def test_it_loaded_data(self):
         eq_('foobar', self.tested.hostname)
         eq_(1, len(self.tested.metrics))
-
-    def test_default_resolver(self):
-        resolver = default_resolver()
-        tags = resolver.resolve("123.3")
-        eq_('123', tags["index"])
-        eq_('3', tags["index2"])
 
 
 class TestMetric(object):
@@ -51,6 +48,9 @@ class TestMetric(object):
         snmp.get = Mock(return_value=123)
         self.snmpmock = snmp
         self.time = time.time()
+        main = Main()
+        main.load_resolvers()
+        self.resolvers = main.resolvers
 
     @patch('time.time')
     def test_opentsdb_walk_metric(self, mocktime):
@@ -68,7 +68,7 @@ class TestMetric(object):
         m = Metric(
             data=mdata,
             snmp=self.snmpmock,
-            resolvers={'default': default_resolver},
+            resolvers=self.resolvers,
             host="foo"
         )
         #test _tags_to_str with empty tags
@@ -111,7 +111,7 @@ class TestMetric(object):
         m = Metric(
             data=mdata,
             snmp=self.snmpmock,
-            resolvers={'default': default_resolver},
+            resolvers=self.resolvers,
             host='foo'
         )
         result = m.get_opentsdb_commands()[0]

@@ -1,6 +1,7 @@
 from Queue import Queue, Empty
 from time import sleep
 import threading
+from pkg_resources import iter_entry_points
 from opentsdb.snmp.device import Device
 from opentsdb.snmp.sender import SenderManager
 import json
@@ -34,15 +35,14 @@ def run():
 
 
 class Main:
-    def __init__(self, readers=5, host_list="hosts.json"):
+    def __init__(self, readers=5, host_list=None):
         self.readerq = Queue()
         self.senderq = Queue()
         self.readers = readers
-        self.conf = ConfigReader(host_list)
-        self.sender_manger = SenderManager(
-            squeue=self.senderq,
-            tsd_list=self.conf.tsd_list
-        )
+        self.host_list = host_list
+        if self.host_list:
+            self.conf = ConfigReader(host_list)
+        self.resolvers = self.load_resolvers()
 
     def init_readers(self):
         self.pool = []
@@ -51,12 +51,31 @@ class Main:
             readth.start()
             self.pool.append(readth)
 
+    def init_senders(self):
+        self.sender_manger = SenderManager(
+            squeue=self.senderq,
+            tsd_list=self.conf.tsd_list
+        )
+
+    def load_resolvers(self):
+        resolvers = {}
+        for entry in iter_entry_points(group="resolvers"):
+            resolvers[entry.name] = entry.load()
+        return resolvers
+
+    def load_devices(self):
+        self.devices = []
+        for d in self.conf.devicelist():
+            self.devices.append(Device(d, self.resolvers))
+        return self.devices
+
     def run(self, once):
+        self.init_senders()
         self.init_readers()
-        devices = self.conf.devices
+        self.load_devices()
         while(True):
             """fill reader queue"""
-            for d in devices:
+            for d in self.devices:
                 self.readerq.put(d)
             self.readerq.join()
             if (once):
@@ -67,18 +86,14 @@ class ConfigReader:
     def __init__(self, path):
         self.path = path
         self.data = self.load_file(path)
-        self.load_devices()
         self.load_tsd_list()
 
     def load_file(self, path):
         with open(path) as fp:
             return json.load(fp)
 
-    def load_devices(self):
-        self.devices = []
-        for d in self.data["devices"]:
-            self.devices.append(Device(d))
-        return self.devices
+    def devicelist(self):
+        return self.data["devices"]
 
     def load_tsd_list(self):
         self.tsd_list = []
