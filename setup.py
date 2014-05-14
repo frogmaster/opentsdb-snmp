@@ -12,6 +12,13 @@ import version
 setuptools.setup(
     name="opentsdb.snmp",
     version=version.get_git_version(),
+    namespace_packages=["opentsdb"],
+    packages=setuptools.find_packages("src"),
+    package_dir={
+        "": "src",
+    },
+    package_data={
+    },
     install_requires=[
         "netsnmp-python"
     ],
