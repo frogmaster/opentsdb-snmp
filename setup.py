@@ -27,6 +27,9 @@ setuptools.setup(
             "default=opentsdb.snmp.resolvers.default:Default",
             "ifname=opentsdb.snmp.resolvers.ifname:IfName",
             "direction_after_idx=opentsdb.snmp.resolvers.after_idx:AfterIndex",
+        ],
+        "value_modifiers": [
+            "rate=opentsdb.snmp.value_modifiers.rate:Rate",
         ]
     },
     test_suite="nose.collector",

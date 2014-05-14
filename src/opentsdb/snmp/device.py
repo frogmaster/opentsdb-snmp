@@ -3,16 +3,18 @@ from opentsdb.snmp.snmp_session import SNMPSession
 
 
 class Device:
-    def __init__(self, data, resolvers):
+    def __init__(self, data, resolvers, mods):
         self.hostname = data["hostname"]
         self.community = data["community"]
         self.snmp_version = data["snmp_version"]
         self.metrics = []
         self.resolvers = resolvers
+        self.value_modifiers = mods
         self.init_snmp()
         for m in data["metrics"]:
             metric = Metric(m, self.snmp,
                             resolvers=self.resolvers,
+                            value_modifiers=self.value_modifiers,
                             host=self.hostname
                             )
             self.metrics.append(metric)
@@ -29,6 +31,3 @@ class Device:
         for m in self.metrics:
             data = data + m.get_opentsdb_commands()
         return data
-
-
-

@@ -3,11 +3,16 @@ import time
 
 class Metric:
     'Metric class'
-    def __init__(self, data, snmp, resolvers=None, host=None):
+    def __init__(self, data, snmp,
+                 resolvers=None,
+                 host=None,
+                 value_modifiers=None
+                 ):
         self.name = data["metric"]
         self.tags = data["tags"]
         self.oid = data["oid"]
         self.host = host
+        self.value_modifier = None
         if data["type"] == "walk":
             self.walk = True
             if "resolver" in data and data["resolver"] in resolvers:
@@ -16,6 +21,8 @@ class Metric:
                 self.resolver = resolvers["default"]
         else:
             self.walk = False
+        if "rate" in data and data["rate"]:
+            self.value_modifier = value_modifiers["rate"]
         self.snmp = snmp
 
     def _get_walk(self):
@@ -31,11 +38,19 @@ class Metric:
     def _process_dp(self, dp, key=None):
         tags = self.tags
         if (key):
-            tags = dict(tags.items() + self.resolver().resolve(key).items())
+            tags = dict(tags.items() + self.resolver.resolve(key).items())
         tags["host"] = self.host
         tagstr = self._tags_to_str(tags)
+        ts = time.time()
+        if self.value_modifier:
+            dp = self.value_modifier.get_value(
+                key=self.name + tagstr,
+                time=ts,
+                value=dp
+            )
+
         buf = "put {0} {1} {2} {3}".format(
-            self.name, int(time.time()), dp, tagstr
+            self.name, int(ts), dp, tagstr
         )
         return buf
 

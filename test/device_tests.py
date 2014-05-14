@@ -26,9 +26,9 @@ class TestDevice(object):
         }
         main = Main()
         main.load_resolvers
-        self.tested = Device(d, main.resolvers)
+        self.tested = Device(d, main.resolvers, main.value_modifiers)
         d["metrics"][0]["resolver"] = "default"
-        self.tested = Device(d, main.resolvers)
+        self.tested = Device(d, main.resolvers, main.value_modifiers)
 
     def teardown(self):
         self.tested = None

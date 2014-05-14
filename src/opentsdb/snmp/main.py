@@ -43,6 +43,7 @@ class Main:
         if self.host_list:
             self.conf = ConfigReader(host_list)
         self.resolvers = self.load_resolvers()
+        self.value_modifiers = self.load_value_modifiers()
 
     def init_readers(self):
         self.pool = []
@@ -60,13 +61,20 @@ class Main:
     def load_resolvers(self):
         resolvers = {}
         for entry in iter_entry_points(group="resolvers"):
-            resolvers[entry.name] = entry.load()
+            resolvers[entry.name] = entry.load()()
         return resolvers
+
+    def load_value_modifiers(self):
+        mods = {}
+        for entry in iter_entry_points(group="value_modifiers"):
+            mods[entry.name] = entry.load()()
+        return mods
 
     def load_devices(self):
         self.devices = []
         for d in self.conf.devicelist():
-            self.devices.append(Device(d, self.resolvers))
+            d = Device(d, self.resolvers, self.value_modifiers)
+            self.devices.append(d)
         return self.devices
 
     def run(self, once):
