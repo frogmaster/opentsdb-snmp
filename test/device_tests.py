@@ -12,23 +12,12 @@ class TestDevice(object):
             'hostname': 'foobar',
             'community': 'public',
             'snmp_version': 2,
-            'metrics': [
-                {
-                    'metric': 'interface.packets',
-                    'oid': '.1.3.6.1.2.1.31.1.1.1.9',
-                    'type': 'walk',
-                    'tags': {
-                        'direction': "in",
-                        'type': 'broadcast'
-                    },
-                }
-            ]
+            'metrics': ["ifInUcastPkts"]
         }
-        main = Main()
+        main = Main(host_list="misc/sample_conf.json")
         main.load_resolvers
-        self.tested = Device(d, main.resolvers, main.value_modifiers)
-        d["metrics"][0]["resolver"] = "default"
-        self.tested = Device(d, main.resolvers, main.value_modifiers)
+        self.tested = Device(d, main.resolvers,
+                             main.value_modifiers, main.conf.metrics())
 
     def teardown(self):
         self.tested = None

@@ -3,7 +3,7 @@ from opentsdb.snmp.snmp_session import SNMPSession
 
 
 class Device:
-    def __init__(self, data, resolvers, mods):
+    def __init__(self, data, resolvers, mods, metrics):
         self.hostname = data["hostname"]
         self.community = data["community"]
         self.snmp_version = data["snmp_version"]
@@ -12,7 +12,9 @@ class Device:
         self.value_modifiers = mods
         self.init_snmp()
         for m in data["metrics"]:
-            metric = Metric(m, self.snmp,
+            if not m in metrics:
+                continue
+            metric = Metric(metrics[m], self.snmp,
                             resolvers=self.resolvers,
                             value_modifiers=self.value_modifiers,
                             host=self.hostname

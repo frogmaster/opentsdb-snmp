@@ -1,0 +1,147 @@
+{
+    "hosts_file": "misc/sample_hostlist.json",
+    "tsd":[{
+            "host": "localhost",
+            "port": 5431
+        },
+        {
+            "host": "localhost"
+        }
+    ],
+    "metrics" : {
+        "ifHCOutUcastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.11",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "out",
+                "type" : "unicast"
+            }
+        },
+        "ifHCInUcastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.7",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in",
+                "type" : "unicast"
+            }
+        },
+        "ifHCOutOctets" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.10",
+            "metric" : "inferface.octets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "out"
+            }
+        },
+        "ifInUcastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.2.2.1.11",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in",
+                "type" : "unicast"
+            }
+        },
+        "ifHCInMulticastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.8",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in",
+                "type" : "multicast"
+            }
+        },
+        "ifOutOctets" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.2.2.1.16",
+            "metric" : "inferface.octets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "out"
+            }
+        },
+        "ifOutErrors" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.2.2.1.20",
+            "metric" : "interface.errors",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in"
+            }
+        },
+        "ifHCOutBroadcastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.13",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "out",
+                "type" : "broadcast"
+            }
+        },
+        "ifInErrors" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.2.2.1.14",
+            "metric" : "interface.errors",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in"
+            }
+        },
+        "ifHCInBroadcastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.9",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in",
+                "type" : "broadcast"
+            }
+        },
+        "ifInOctets" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.2.2.1.10",
+            "metric" : "interface.octets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in"
+            }
+        },
+        "ifHCOutMulticastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.12",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "out",
+                "type" : "multicast"
+            }
+        },
+        "ifOutUcastPkts" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.2.2.1.17",
+            "metric" : "interface.packets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "out",
+                "type" : "unicast"
+            }
+        },
+        "ifHCInOctets" : {
+            "resolver" : "ifname",
+            "oid" : "1.3.6.1.2.1.31.1.1.1.6",
+            "metric" : "inferface.octets",
+            "type" : "walk",
+            "tags" : {
+                "direction" : "in"
+            }
+        }
+    }
+}

@@ -73,7 +73,8 @@ class Main:
     def load_devices(self):
         self.devices = []
         for d in self.conf.devicelist():
-            d = Device(d, self.resolvers, self.value_modifiers)
+            d = Device(d, self.resolvers,
+                       self.value_modifiers, self.conf.metrics())
             self.devices.append(d)
         return self.devices
 
@@ -94,6 +95,7 @@ class ConfigReader:
     def __init__(self, path):
         self.path = path
         self.data = self.load_file(path)
+        self.hostlist = self.load_file(self.data["hosts_file"])
         self.load_tsd_list()
 
     def load_file(self, path):
@@ -101,7 +103,10 @@ class ConfigReader:
             return json.load(fp)
 
     def devicelist(self):
-        return self.data["devices"]
+        return self.hostlist
+
+    def metrics(self):
+        return self.data["metrics"]
 
     def load_tsd_list(self):
         self.tsd_list = []

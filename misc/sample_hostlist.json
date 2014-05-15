@@ -1,0 +1,7 @@
+[{
+    "hostname": "foobar",
+    "community": "public",
+    "snmp_version": 2,
+    "metrics": ["ifInUcastPkts"]
+}
+]

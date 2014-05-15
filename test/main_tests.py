@@ -6,11 +6,12 @@ from Queue import Queue
 
 class TestConfigReader(object):
     def setup(self):
-        self.hlr = app.ConfigReader("misc/sample_data.json")
+        self.hlr = app.ConfigReader("misc/sample_conf.json")
 
     def test_load_file(self):
         loaded_data = self.hlr.load_file(self.hlr.path)
-        ok_("devices" in loaded_data)
+        ok_("metrics" in loaded_data)
+        ok_("hosts_file" in loaded_data)
 
     def test_devicelist(self):
         devices = self.hlr.devicelist()
@@ -44,7 +45,7 @@ class TestReaderThread(object):
 
 class TestMain(object):
     def setup(self):
-        self.mainobj = app.Main(readers=1, host_list="misc/sample_data.json")
+        self.mainobj = app.Main(readers=1, host_list="misc/sample_conf.json")
 
     def test_init_readers(self):
         self.mainobj.init_readers()
