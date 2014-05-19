@@ -34,6 +34,7 @@ setuptools.setup(
             "default=opentsdb.snmp.resolvers.default:Default",
             "ifname=opentsdb.snmp.resolvers.ifname:IfName",
             "direction_after_idx=opentsdb.snmp.resolvers.after_idx:AfterIndex",
+            "d500_xdsl=opentsdb.snmp.resolvers.d500_xdsl:D500_xdsl",
         ],
         "value_modifiers": [
             "rate=opentsdb.snmp.value_modifiers.rate:Rate",
