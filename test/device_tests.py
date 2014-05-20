@@ -14,7 +14,7 @@ class TestDevice(object):
             'snmp_version': 2,
             'metrics': ["ifInUcastPkts"]
         }
-        main = Main(host_list="misc/sample_conf.json")
+        main = Main(conf="misc/sample_conf.yml")
         main.load_resolvers
         self.tested = Device(d, main.resolvers,
                              main.value_modifiers, main.conf.metrics())

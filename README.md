@@ -4,65 +4,51 @@ Simple program to push metrics from snmp to [opentsdb](http://opentsdb.net/)
 
 ## configuration
 
-Configuration is stored in JSON format, which is a pain to write, so you should probably generate it somohow.
-Format is as follows:
+Configuration is stored in YAML format and has three values: tsd, hosts_file and metrics.
+Example configuration:
 
-    {
-        "tsd": [
-            {
-                "hostname": "foo.bar",
-                "port": 4242
-            },
-            {
-                "hostname": "localhost",
-            }
-        ].
-        "devices": [
-            {
-                "hostname": "foobar",
-                "community": "public",
-                "snmp_version": 2,
-                "metrics": [
-                    {
-                        "metric": "interface.packets",
-                        "oid": ".1.3.6.1.2.1.31.1.1.1.9",
-                        "type": "walk",
-                        "tags": {
-                            "direction": "in",
-                            "type": "broadcast"
-                        },
-                        "resolver": "default"
-                    }
-                ]
-            }
-        ]
-    }
-
-### tsd section
-
-Entry contains hostname and port (not mandatory and defaults to 4242)
+    hosts_file: "misc/sample_hostlist.yml"
+    tsd: #list of tsd-s
+      -
+        host: "localhost" #host
+        port: 5431 #port
+      -
+        host: "localhost"
+    metrics:
+      ifHCOutUcastPkts: #unique metric name used in (device section in hostlist file)
+        resolver: "ifname" #relevant only when walk is used
+        oid: "1.3.6.1.2.1.31.1.1.1.11"
+        metric: "interface.packets" #metric name on tsd side
+        type: "walk" #either walk or get
+        rate: true #wether rate should be calculated
+        tags: #tags on tsd side
+          direction: "out"
+          type: "unicast"
 
 
-### devices section
+####hosts_file example:
 
-Entry contains hostname, snmp community and version (1/2). 
-Also a metrics array, which needs more detail.
+    - 
+      hostname: "foo"
+      community: "bar"
+      snmp_version: 2
+      metrics: 
+        - "ifInHCOutUcastPkts"
+    - 
+      hostname: "bar"
+      community: "foo"
+      snmp_version: 2
+      metrics: 
+        - "ifInUcastPkts"
+        - ""ifOutOctets"
 
 
-### metrics section
-
-* *metric* - name for the metric
-* *oid* - snmp *numeric* oid, note that the . in the beginning is mandatory. Textual oids, are currently not supported
-* *type* - walk/get wether we should use get or walk for this oid
-* *tags* - extra tags to append. Note that metric+tags should be unique per device section (although no such check currenly exists). Also host=hostname tag is added automatically.
-* *resolver* - resolver to use.
-
-### resolvers
+## resolvers
 
 Resolver takes raw data and returns extra tags.
-Currently there's an implementation for default resolver. More will be added as needed. Also to location and mechanism of resolver classes is subject to change.
+Things passed to resolver resolve() method are: index, device object
 
-#### default
+### default
 
 Adds index tags based on oid index. For example when metrics oid is 1.2.3 and walk returns something like 1.2.3.4.5 then tags returned are index=4 and index2=5
 

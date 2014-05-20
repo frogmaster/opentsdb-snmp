@@ -7,7 +7,7 @@ from Queue import Queue
 
 class TestConfigReader(object):
     def setup(self):
-        self.hlr = app.ConfigReader("misc/sample_conf.json")
+        self.hlr = app.ConfigReader("misc/sample_conf.yml")
 
     def test_load_file(self):
         loaded_data = self.hlr.load_file(self.hlr.path)
@@ -48,7 +48,7 @@ class TestMain(object):
     def setup(self):
         self.mainobj = app.Main(
             readers=1,
-            host_list="misc/sample_conf.json",
+            conf="misc/sample_conf.yml",
             interval=2
         )
 

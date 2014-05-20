@@ -4,7 +4,7 @@ import threading
 from pkg_resources import iter_entry_points
 from opentsdb.snmp.device import Device
 from opentsdb.snmp.sender import SenderManager
-import json
+import yaml
 import sys
 import argparse
 
@@ -35,22 +35,21 @@ def run():
 
     app = Main(
         readers=args.readers,
-        host_list=args.conffile,
+        conf=args.conffile,
         interval=args.interval
     )
     app.run()
 
 
 class Main:
-    def __init__(self, readers=5, host_list=None, interval=300):
+    def __init__(self, readers=5, conf=None, interval=300):
         self.readerq = Queue()
         self.pool = []
         self.senderq = Queue()
         self.readers = readers
-        self.host_list = host_list
         self.interval = interval
-        if self.host_list:
-            self.conf = ConfigReader(host_list)
+        if conf:
+            self.conf = ConfigReader(conf)
         self.resolvers = self.load_resolvers()
         self.value_modifiers = self.load_value_modifiers()
 
@@ -112,7 +111,7 @@ class ConfigReader:
 
     def load_file(self, path):
         with open(path) as fp:
-            return json.load(fp)
+            return yaml.load(fp)
 
     def devicelist(self):
         return self.hostlist
