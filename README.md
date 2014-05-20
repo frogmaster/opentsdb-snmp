@@ -43,6 +43,7 @@ Example configuration:
         - ""ifOutOctets"
 
 
+
 ## resolvers
 
 Resolver takes raw data and returns extra tags.

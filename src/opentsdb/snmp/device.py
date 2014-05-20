@@ -14,11 +14,7 @@ class Device:
         for m in data["metrics"]:
             if not m in metrics:
                 continue
-            metric = Metric(metrics[m], self.snmp,
-                            resolvers=self.resolvers,
-                            value_modifiers=self.value_modifiers,
-                            host=self.hostname
-                            )
+            metric = Metric(metrics[m], self)
             self.metrics.append(metric)
 
     def init_snmp(self):

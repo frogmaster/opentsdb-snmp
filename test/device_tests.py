@@ -35,11 +35,13 @@ class TestMetric(object):
             "2": 20,
         })
         snmp.get = Mock(return_value=123)
-        self.snmpmock = snmp
         self.time = time.time()
         main = Main()
         main.load_resolvers()
-        self.resolvers = main.resolvers
+        self.mockdevice = Mock()
+        self.mockdevice.hostname = "foo"
+        self.mockdevice.snmp = snmp
+        self.mockdevice.resolvers = main.resolvers
 
     @patch('time.time')
     def test_opentsdb_walk_metric(self, mocktime):
@@ -56,9 +58,7 @@ class TestMetric(object):
         }
         m = Metric(
             data=mdata,
-            snmp=self.snmpmock,
-            resolvers=self.resolvers,
-            host="foo"
+            device=self.mockdevice
         )
         #test _tags_to_str with empty tags
         eq_("", m._tags_to_str({}))
@@ -99,9 +99,7 @@ class TestMetric(object):
         }
         m = Metric(
             data=mdata,
-            snmp=self.snmpmock,
-            resolvers=self.resolvers,
-            host='foo'
+            device=self.mockdevice
         )
         result = m.get_opentsdb_commands()[0]
         eq_(
