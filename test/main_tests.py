@@ -1,5 +1,6 @@
 from nose.tools import eq_, ok_
 import opentsdb.snmp.main as app
+import time
 from mock import Mock
 from Queue import Queue
 
@@ -45,7 +46,11 @@ class TestReaderThread(object):
 
 class TestMain(object):
     def setup(self):
-        self.mainobj = app.Main(readers=1, host_list="misc/sample_conf.json")
+        self.mainobj = app.Main(
+            readers=1,
+            host_list="misc/sample_conf.json",
+            interval=2
+        )
 
     def test_init_readers(self):
         self.mainobj.init_readers()
@@ -61,9 +66,12 @@ class TestMain(object):
 
         self.mainobj.devices[0] = Mock()
         self.mainobj.devices[0].poll = Mock(return_value=[])
+        cur_time = time.time()
         self.mainobj.run(True)
         for i in self.mainobj.pool:
             i.stop()
+        delta = time.time() - cur_time
+        ok_(delta >= 2, "Sleep if we took less than interval")
 
     def test_init_senders(self):
         self.mainobj.init_senders()

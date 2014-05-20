@@ -1,5 +1,5 @@
 from Queue import Queue, Empty
-from time import sleep
+import time
 import threading
 from pkg_resources import iter_entry_points
 from opentsdb.snmp.device import Device
@@ -17,7 +17,10 @@ parser.add_argument(
     "-c", "--config", dest="conffile",
     help="Location of configuration file"
 )
-
+parser.add_argument(
+    "-i", "--interval", dest="interval", default=300,
+    help="One run takes at least this much seconds, default 300"
+)
 parser.add_argument(
     "-r", "--readers", dest="readers", default=5,
     help="Number of reader threads, default 5"
@@ -30,23 +33,28 @@ def run():
     if not args.conffile:
         raise SystemExit("Must specify configuration file with --config")
 
-    app = Main(readers=args.readers, host_list=args.conffile)
+    app = Main(
+        readers=args.readers,
+        host_list=args.conffile,
+        interval=args.interval
+    )
     app.run()
 
 
 class Main:
-    def __init__(self, readers=5, host_list=None):
+    def __init__(self, readers=5, host_list=None, interval=300):
         self.readerq = Queue()
+        self.pool = []
         self.senderq = Queue()
         self.readers = readers
         self.host_list = host_list
+        self.interval = interval
         if self.host_list:
             self.conf = ConfigReader(host_list)
         self.resolvers = self.load_resolvers()
         self.value_modifiers = self.load_value_modifiers()
 
     def init_readers(self):
-        self.pool = []
         for i in range(0, self.readers):
             readth = ReaderThread(self.readerq, self.senderq)
             readth.start()
@@ -83,10 +91,14 @@ class Main:
         self.init_readers()
         self.load_devices()
         while(True):
+            start_time = time.time()
             """fill reader queue"""
             for d in self.devices:
                 self.readerq.put(d)
             self.readerq.join()
+            delta = time.time() - start_time
+            if delta < self.interval:
+                time.sleep(self.interval - delta)
             if (once):
                 break
 
@@ -135,7 +147,7 @@ class ReaderThread(threading.Thread):
                 for row in data:
                     self.squeue.put(row)
             except Empty:
-                sleep(0.3)
+                time.sleep(0.3)
             except:
                 print "Unexpected error:", sys.exc_info()[0]
                 raise
