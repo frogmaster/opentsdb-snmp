@@ -9,6 +9,8 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+
+
 class IfName:
     cache = {}
 
@@ -27,4 +29,4 @@ class IfName:
         self.snmp_session = device.snmp
         self.hostname = device.hostname
         self._init_cache()
-        return IfName.cache[self.hostname][index]
+        return {"interface": IfName.cache[self.hostname][index]}
