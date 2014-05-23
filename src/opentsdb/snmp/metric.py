@@ -40,7 +40,9 @@ class Metric:
     def _process_walk_data(self, data):
         buf = []
         for idx, dp in data.items():
-            buf.append(self._process_dp(dp, idx))
+            item = self._process_dp(dp, idx)
+            if (item):
+                buf.append(item)
         return buf
 
     def _process_dp(self, dp, key=None):
@@ -54,12 +56,13 @@ class Metric:
         tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
-            dp = self.value_modifier.get_value(
+            dp = self.value_modifier.modify(
                 key=self.name + tagstr,
-                time=ts,
+                ts=ts,
                 value=dp
             )
-
+        if not dp:
+            return None
         buf = "put {0} {1} {2} {3}".format(
             self.name, int(ts), dp, tagstr
         )
