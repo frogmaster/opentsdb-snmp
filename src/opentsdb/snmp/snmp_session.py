@@ -23,7 +23,8 @@ class SNMPSession:
         self.session = Session(
             DestHost=self.host,
             Community=self.community,
-            Version=self.version
+            Version=self.version,
+            UseNumeric=1,
         )
 
     def walk(self, oid, stripoid=True):
@@ -35,6 +36,8 @@ class SNMPSession:
         self.session.walk(vl)
         ret = {}
         for v in vl:
+            if v.tag is None:
+                continue
             full_oid = v.tag
             if v.iid or v.iid == 0:
                 full_oid = v.tag + "." + v.iid
