@@ -15,8 +15,6 @@ import random
 import time
 import logging
 from Queue import Empty
-logging.basicConfig(level="DEBUG")
-LOG = logging.getLogger('tcollector')
 
 
 class SenderManager:
@@ -35,6 +33,7 @@ class SenderManager:
             self.workers.append(st)
 
     def run(self):
+        logging.debug("SenderManager: starting senders")
         for w in self.workers:
             w.start()
 
@@ -60,8 +59,8 @@ class TSDConnection:
                 socket.AF_UNSPEC,
                 socket.SOCK_STREAM, 0)
         except socket.error, msg:
-            LOG.warning('DNS resolving failed for %s:%d: %s',
-                        self.host, self.port, msg)
+            logging.warning('DNS resolving failed for %s:%d: %s',
+                            self.host, self.port, msg)
             return None
         for family, socktype, proto, canonname, sockaddr in addresses:
             try:
@@ -70,8 +69,8 @@ class TSDConnection:
                 soc.connect(sockaddr)
                 return soc
             except socket.error, msg:
-                LOG.warning('Connection attempt failed to %s:%d: %s',
-                            self.host, self.port, msg)
+                logging.warning('Connection attempt failed to %s:%d: %s',
+                                self.host, self.port, msg)
                 soc.close()
                 return None
 
@@ -93,7 +92,7 @@ class TSDConnection:
 
         # we use the version command as it is very low effort for the TSD
         # to respond
-        LOG.debug('verifying our TSD connection is alive')
+        logging.debug('verifying our TSD connection is alive')
         try:
             self.socket.sendall('version\n')
         except socket.error:
@@ -132,14 +131,13 @@ class TSDConnection:
     def send_data(self, data):
         out = ''
 
-        if LOG.level == logging.DEBUG:
-            for line in data:
-                LOG.debug('SENDING: %s', line)
+        for line in data:
+            logging.debug('SENDING: %s', line)
 
         out = "\n".join(data)
 
         if not out:
-            LOG.debug('send_data no data?')
+            logging.debug('send_data no data?')
             return
 
         # try sending our data.  if an exception occurs, return False
@@ -147,7 +145,7 @@ class TSDConnection:
             self.socket.sendall(out)
             return True
         except socket.error, msg:
-            LOG.error('failed to send data: %s', msg)
+            logging.error('failed to send data: %s', msg)
             try:
                 self.socket.close()
             except socket.error:
@@ -167,6 +165,7 @@ class SenderThread(threading.Thread):
         self.queue_timeout = queue_timeout
 
     def stop(self):
+        logging.debug("Stopping SenterThread %s %s", self.host, self.port)
         self._stop = True
         if self.tsd:
             self.tsd.socket = None
@@ -188,6 +187,7 @@ class SenderThread(threading.Thread):
                     self.squeue.put(line)
 
     def run(self):
+        logging.debug("Starting SenterThread %s %s", self.host, self.port)
         while not self._stop:
             self._mainloop()
 
