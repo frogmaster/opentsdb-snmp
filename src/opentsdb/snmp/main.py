@@ -96,7 +96,7 @@ class Main:
             self.devices.append(d)
         return self.devices
 
-    def run(self, once):
+    def run(self, once=False):
         self.init_senders()
         self.init_readers()
         self.load_devices()
