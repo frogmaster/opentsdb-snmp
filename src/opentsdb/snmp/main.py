@@ -109,17 +109,21 @@ class Main:
         self.init_senders()
         self.init_readers()
         self.load_devices()
-        while(True):
-            start_time = time.time()
-            """fill reader queue"""
-            for d in self.devices:
-                self.readerq.put(d)
-            self.readerq.join()
-            delta = time.time() - start_time
-            if delta < self.interval:
-                time.sleep(self.interval - delta)
-            if (once):
-                break
+        try:
+            while(True):
+                start_time = time.time()
+                """fill reader queue"""
+                for d in self.devices:
+                    self.readerq.put(d)
+                self.readerq.join()
+                delta = time.time() - start_time
+                if delta < self.interval:
+                    time.sleep(self.interval - delta)
+                if (once):
+                    break
+        except (KeyboardInterrupt, SystemExit):
+            self.stop_readers()
+            self.stop_senders()
         self.stop_readers()
         self.stop_senders()
 

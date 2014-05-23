@@ -9,11 +9,13 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+
+
 class Rate:
     cache = {}
 
     def modify(self, key, value, ts):
-        new = {'ts': ts, 'value': value}
+        new = {'ts': ts, 'value': float(value)}
         if not key in self.cache:
             self.cache[key] = new
             return None
