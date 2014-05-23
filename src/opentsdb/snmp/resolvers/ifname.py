@@ -9,24 +9,25 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+import logging
 
 
 class IfName:
     cache = {}
 
-    def _init_cache(self):
-        if self.hostname not in IfName.cache:
-            ifnames = self.get_ifnames()
-            IfName.cache[self.hostname] = ifnames
-
-    def get_ifnames(self):
-        data = self.snmp_session.walk('.1.3.6.1.2.1.31.1.1.1.1')
+    def get_ifnames(self, snmp):
+        data = snmp.walk('.1.3.6.1.2.1.31.1.1.1.1')
         if not data:
             raise Exception("SNMP walk failed")
         return data
 
     def resolve(self, index, device=None):
-        self.snmp_session = device.snmp
-        self.hostname = device.hostname
-        self._init_cache()
-        return {"interface": IfName.cache[self.hostname][index]}
+        snmp = device.snmp
+        hostname = device.hostname
+        if hostname not in IfName.cache:
+            IfName.cache[hostname] = self.get_ifnames(snmp)
+        if index in IfName.cache[hostname]:
+            return {"interface": IfName.cache[hostname][index]}
+        else:
+            logging.debug("Cache miss: %s %s not in %s",
+                          hostname, index, IfName.cache[hostname])
