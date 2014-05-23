@@ -12,7 +12,7 @@
 from nose.tools import eq_, ok_
 import opentsdb.snmp.main as app
 import time
-from mock import Mock
+from mock import Mock, patch
 from Queue import Queue
 
 
@@ -29,8 +29,8 @@ class TestConfigReader(object):
         devices = self.hlr.devicelist()
         eq_("foobar", devices[0]["hostname"])
 
-    def test_load_tsd_list(self):
-        tsd_list = self.hlr.load_tsd_list()
+    def test_tsd_list(self):
+        tsd_list = self.hlr.tsd_list()
         ok_(tsd_list[0], ('localhost', 5431))
         ok_(tsd_list[1], ('localhost', 4242))
 
@@ -69,21 +69,22 @@ class TestMain(object):
         self.mainobj.pool[0].stop()
         self.mainobj.pool = []
 
-    def test_run(self):
+    @patch('opentsdb.snmp.sender.SenderManager.run')
+    @patch('opentsdb.snmp.sender.SenderThread.connect')
+    def test_run(self, mock1, mock2):
         self.mainobj.load_devices()
         # load_devices is called in run method,
         # so devices get's overwritten unless mocked
         self.mainobj.load_devices = Mock()
-
         self.mainobj.devices[0] = Mock()
         self.mainobj.devices[0].poll = Mock(return_value=[])
+
         cur_time = time.time()
         self.mainobj.run(True)
-        for i in self.mainobj.pool:
-            i.stop()
         delta = time.time() - cur_time
         ok_(delta >= 2, "Sleep if we took less than interval")
+        self.mainobj.sender_manager.stop()
 
     def test_init_senders(self):
         self.mainobj.init_senders()
-        self.mainobj.sender_manger.stop()
+        self.mainobj.sender_manager.stop()

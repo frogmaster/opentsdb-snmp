@@ -18,10 +18,11 @@ from opentsdb.snmp.sender import SenderManager
 import yaml
 import sys
 import argparse
+import logging
 
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
-
+logging.basicConfig(level=logging.DEBUG)
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -45,9 +46,9 @@ def run():
         raise SystemExit("Must specify configuration file with --config")
 
     app = Main(
-        readers=args.readers,
+        readers=int(args.readers),
         conf=args.conffile,
-        interval=args.interval
+        interval=int(args.interval)
     )
     app.run()
 
@@ -70,11 +71,19 @@ class Main:
             readth.start()
             self.pool.append(readth)
 
+    def stop_readers(self):
+        for w in self.pool:
+            w.stop()
+
     def init_senders(self):
-        self.sender_manger = SenderManager(
+        self.sender_manager = SenderManager(
             squeue=self.senderq,
-            tsd_list=self.conf.tsd_list
+            tsd_list=self.conf.tsd_list()
         )
+        self.sender_manager.run()
+
+    def stop_senders(self):
+        self.sender_manager.stop()
 
     def load_resolvers(self):
         resolvers = {}
@@ -111,6 +120,8 @@ class Main:
                 time.sleep(self.interval - delta)
             if (once):
                 break
+        self.stop_readers()
+        self.stop_senders()
 
 
 class ConfigReader:
@@ -118,7 +129,6 @@ class ConfigReader:
         self.path = path
         self.data = self.load_file(path)
         self.hostlist = self.load_file(self.data["hosts_file"])
-        self.load_tsd_list()
 
     def load_file(self, path):
         with open(path) as fp:
@@ -130,14 +140,14 @@ class ConfigReader:
     def metrics(self):
         return self.data["metrics"]
 
-    def load_tsd_list(self):
-        self.tsd_list = []
+    def tsd_list(self):
+        tsd_list = []
         for tsd in self.data["tsd"]:
             port = 4242
             if "port" in tsd:
                 port = tsd["port"]
-            self.tsd_list.append((tsd["host"], port))
-        return self.tsd_list
+            tsd_list.append((tsd["host"], port))
+        return tsd_list
 
 
 class ReaderThread(threading.Thread):
@@ -148,6 +158,7 @@ class ReaderThread(threading.Thread):
         self._stop = False
 
     def run(self):
+        logging.info("Starting ReaderThread")
         while self._stop is False:
             try:
                 device = self.rqueue.get_nowait()
@@ -166,4 +177,5 @@ class ReaderThread(threading.Thread):
         return
 
     def stop(self):
+        logging.info("Stopping ReaderThread")
         self._stop = True
