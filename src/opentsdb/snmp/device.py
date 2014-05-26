@@ -21,7 +21,6 @@ class Device:
         self.metrics = []
         self.resolvers = resolvers
         self.value_modifiers = mods
-        self.init_snmp()
         for m in data["metrics"]:
             if not m in metrics:
                 continue
@@ -35,8 +34,13 @@ class Device:
             version=self.snmp_version
         )
 
+    def close_snmp(self):
+        self.snmp = None
+
     def poll(self):
+        self.init_snmp()
         data = []
         for m in self.metrics:
             data = data + m.get_opentsdb_commands()
+        self.close_snmp()
         return data

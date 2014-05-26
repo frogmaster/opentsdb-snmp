@@ -30,11 +30,10 @@ class Metric:
             self.walk = False
         if "rate" in data and data["rate"]:
             self.value_modifier = device.value_modifiers["rate"]
-        self.snmp = device.snmp
         self.device = device
 
     def _get_walk(self):
-        data = self.snmp.walk(self.oid)
+        data = self.device.snmp.walk(self.oid)
         return data
 
     def _process_walk_data(self, data):
@@ -78,7 +77,7 @@ class Metric:
             return ""
 
     def _get_get(self):
-        data = self.snmp.get(self.oid)
+        data = self.device.snmp.get(self.oid)
         return data
 
     def get_opentsdb_commands(self):
