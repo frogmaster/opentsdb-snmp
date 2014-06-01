@@ -174,9 +174,9 @@ class ReaderThread(threading.Thread):
         while self._stop is False:
             try:
                 device = self.rqueue.get_nowait()
-                if device:
-                    self.rqueue.task_done()
                 data = device.poll()
+                self.rqueue.task_done()
+                logging.info("done with %s", device.hostname)
                 for row in data:
                     self.squeue.put(row)
             except Empty:
