@@ -37,6 +37,10 @@ parser.add_argument(
     "-r", "--readers", dest="readers", default=5,
     help="Number of reader threads, default 5"
 )
+parser.add_argument(
+    "-t", "--times", dest="times", default=-1,
+    help="Number of times to loop"
+)
 
 
 def run():
@@ -50,7 +54,7 @@ def run():
         conf=args.conffile,
         interval=int(args.interval)
     )
-    app.run()
+    app.run(times=int(args.times))
 
 
 class Main:
@@ -105,22 +109,25 @@ class Main:
             self.devices.append(d)
         return self.devices
 
-    def run(self, once=False):
+    def run(self, times=-1):
         self.init_senders()
         self.init_readers()
         self.load_devices()
         try:
             while(True):
+                if (times == 0):
+                    break
                 start_time = time.time()
                 """fill reader queue"""
                 for d in self.devices:
                     self.readerq.put(d)
                 self.readerq.join()
+                self.senderq.join()
                 delta = time.time() - start_time
                 if delta < self.interval:
                     time.sleep(self.interval - delta)
-                if (once):
-                    break
+                if (times > 0):
+                    times -= 1
         except (KeyboardInterrupt, SystemExit):
             self.stop_readers()
             self.stop_senders()
@@ -159,6 +166,7 @@ class ReaderThread(threading.Thread):
         super(ReaderThread, self).__init__()
         self.rqueue = rqueue
         self.squeue = squeue
+        self.daemon = True
         self._stop = False
 
     def run(self):
