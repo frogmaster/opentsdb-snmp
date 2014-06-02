@@ -25,12 +25,13 @@ class SenderManager:
     def __init__(self, squeue, tsd_list):
         self.workers = []
         for host, port in tsd_list:
-            st = SenderThread(
-                squeue=squeue,
-                host=host,
-                port=port
-            )
-            self.workers.append(st)
+            for i in range(0,1):
+                st = SenderThread(
+                    squeue=squeue,
+                    host=host,
+                    port=port
+                )
+                self.workers.append(st)
 
     def run(self):
         logging.debug("SenderManager: starting senders")
@@ -92,7 +93,7 @@ class TSDConnection:
 
         # we use the version command as it is very low effort for the TSD
         # to respond
-        logging.debug('verifying our TSD connection is alive')
+        # logging.debug('verifying our TSD connection is alive')
         try:
             self.socket.sendall('version\n')
         except socket.error:
@@ -131,8 +132,8 @@ class TSDConnection:
     def send_data(self, data):
         out = ''
 
-        for line in data:
-            logging.debug('SENDING: %s', line)
+#        for line in data:
+#            logging.debug('SENDING: %s', line)
 
         out = "\n".join(data)
 
@@ -162,6 +163,7 @@ class SenderThread(threading.Thread):
         self.port = port
         self.tsd = TSDConnection(host=host, port=port)
         self._stop = False
+        self.daemon = True
         self.queue_timeout = queue_timeout
 
     def stop(self):
@@ -178,13 +180,14 @@ class SenderThread(threading.Thread):
                 line = self.squeue.get(True, self.queue_timeout)
                 senddata.append(line)
                 self.squeue.task_done()
+                if len(senddata) > 100:
+                    break
             except Empty:
+                #logging.debug("Queue empty")
                 break
-
-        if senddata:
-            if not self.tsd.send_data(senddata):
-                for line in senddata:
-                    self.squeue.put(line)
+        if len(senddata) > 0:
+            while not self.tsd.send_data(senddata):
+                time.sleep(10)
 
     def run(self):
         logging.debug("Starting SenterThread %s %s", self.host, self.port)
