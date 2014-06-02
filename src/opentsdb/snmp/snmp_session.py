@@ -25,12 +25,11 @@ class SNMPSession:
             Community=self.community,
             Version=self.version,
             UseNumeric=1,
+            Timeout=1000000,
+            Retries=0,
         )
 
     def walk_v1(self, oid, stripoid=True):
-        if not self.session:
-            self.connect()
-
         vb = Varbind(oid)
         vl = VarList(vb)
         self.session.walk(vl)
@@ -48,16 +47,15 @@ class SNMPSession:
         return ret
 
     def walk(self, oid, stripoid=True):
-        if not self.session:
-            self.connect()
-
         ret = {}
         startindexpos = 0
         runningtreename = oid
 
         while (runningtreename == oid):
             vrs = VarList(Varbind(oid, startindexpos))
-            self.session.getbulk(0, 30, vrs)
+            result = self.session.getbulk(0, 30, vrs)
+            if not result:
+                break
             """ Print output from running getbulk"""
             for i in vrs:
                 full_oid = i.tag
@@ -80,6 +78,4 @@ class SNMPSession:
         return ret
 
     def get(self, oid):
-        if not self.session:
-            self.connect()
         return self.session.get(oid)[0]

@@ -32,25 +32,31 @@ class Metric:
             self.value_modifier = device.value_modifiers["rate"]
         self.device = device
 
-    def _get_walk(self):
-        data = self.device.snmp.walk(self.oid)
+    def _get_walk(self, snmp):
+        data = snmp.walk(self.oid)
         return data
 
     def _process_walk_data(self, data):
         buf = []
         for idx, dp in data.items():
+            if dp is None:
+                next
             item = self._process_dp(dp, idx)
             if (item):
                 buf.append(item)
         return buf
 
     def _process_dp(self, dp, key=None):
+        if dp is None:
+            return
         tags = self.tags
         if (key):
-            tags = dict(
-                tags.items()
-                + self.resolver.resolve(key, device=self.device).items()
-            )
+            resolved = self.resolver.resolve(key, device=self.device)
+            if resolved:
+                tags = dict(
+                    tags.items()
+                    + resolved.items()
+                )
         tags["host"] = self.host
         tagstr = self._tags_to_str(tags)
         ts = time.time()
@@ -76,14 +82,14 @@ class Metric:
         else:
             return ""
 
-    def _get_get(self):
-        data = self.device.snmp.get(self.oid)
+    def _get_get(self, snmp):
+        data = snmp.get(self.oid)
         return data
 
-    def get_opentsdb_commands(self):
+    def get_opentsdb_commands(self, snmp):
         if self.walk:
-            raw = self._get_walk()
+            raw = self._get_walk(snmp)
             return self._process_walk_data(raw)
         else:
-            raw = self._get_get()
+            raw = self._get_get(snmp)
             return [self._process_dp(raw)]

@@ -33,14 +33,18 @@ class Device:
             community=self.community,
             version=self.snmp_version
         )
+        self.snmp.connect()
+        return self.snmp
 
     def close_snmp(self):
         self.snmp = None
 
     def poll(self):
         self.init_snmp()
+        if not self.snmp.session:
+            return []
         data = []
         for m in self.metrics:
-            data = data + m.get_opentsdb_commands()
+            data = data + m.get_opentsdb_commands(self.snmp)
         self.close_snmp()
         return data
