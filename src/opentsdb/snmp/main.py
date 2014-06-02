@@ -59,7 +59,7 @@ def run():
 
 class Main:
     def __init__(self, readers=5, conf=None, interval=300):
-        self.readerq = Queue()
+        self.readerq = Queue(maxsize=10000)
         self.pool = []
         self.senderq = Queue()
         self.readers = readers
@@ -122,7 +122,7 @@ class Main:
                 for d in self.devices:
                     self.readerq.put(d)
                 self.readerq.join()
-                self.senderq.join()
+#                self.senderq.join()
                 delta = time.time() - start_time
                 if delta < self.interval:
                     time.sleep(self.interval - delta)
@@ -174,15 +174,17 @@ class ReaderThread(threading.Thread):
         while self._stop is False:
             try:
                 device = self.rqueue.get_nowait()
-                data = device.poll()
                 self.rqueue.task_done()
+                logging.info("Startring with %s", device.hostname)
+                data = device.poll()
                 logging.info("done with %s", device.hostname)
                 for row in data:
                     self.squeue.put(row)
             except Empty:
                 time.sleep(0.3)
+                logging.debug("Read queue empty")
             except:
-                print "Unexpected error:", sys.exc_info()[0]
+                logging.error("Unexpected error:", sys.exc_info()[0])
                 raise
             finally:
                 next
