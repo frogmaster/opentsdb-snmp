@@ -19,7 +19,7 @@ import yaml
 import sys
 import argparse
 import logging
-
+import yappi
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
 logging.basicConfig(level=logging.DEBUG)
@@ -110,9 +110,10 @@ class Main:
         return self.devices
 
     def run(self, times=-1):
+        yappi.start()
+        self.load_devices()
         self.init_senders()
         self.init_readers()
-        self.load_devices()
         try:
             while(True):
                 if (times == 0):
@@ -133,6 +134,7 @@ class Main:
             self.stop_senders()
         self.stop_readers()
         self.stop_senders()
+        yappi.get_func_stats().save("/home/master/netsnmp.pstat", type="pstat")
 
 
 class ConfigReader:
