@@ -57,7 +57,6 @@ class Metric:
                     tags.items()
                     + resolved.items()
                 )
-        tags["host"] = self.host
         tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
@@ -74,13 +73,10 @@ class Metric:
         return buf
 
     def _tags_to_str(self, tagsdict):
-        buf = []
+        buf = "host=" + self.host
         for key, val in tagsdict.items():
-            buf.append(str(key) + "=" + str(val))
-        if len(buf) > 0:
-            return ' '.join(buf)
-        else:
-            return ""
+            buf += " " + str(key) + "=" + str(val)
+        return buf
 
     def _get_get(self, snmp):
         data = snmp.get(self.oid)
