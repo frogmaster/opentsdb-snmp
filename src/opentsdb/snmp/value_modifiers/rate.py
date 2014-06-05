@@ -12,7 +12,8 @@
 
 
 class Rate:
-    cache = {}
+    def __init__(self, cache):
+        self.cache = cache
 
     def modify(self, key, value, ts):
         new = {'ts': ts, 'value': float(value)}

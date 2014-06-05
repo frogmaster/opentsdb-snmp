@@ -9,14 +9,12 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
-from Queue import Queue, Empty
 import time
-import threading
+import multiprocessing
 from pkg_resources import iter_entry_points
 from opentsdb.snmp.device import Device
 from opentsdb.snmp.sender import SenderManager
 import yaml
-import sys
 import argparse
 import logging
 import yappi
@@ -59,25 +57,15 @@ def run():
 
 class Main:
     def __init__(self, readers=5, conf=None, interval=300):
-        self.readerq = Queue(maxsize=10000)
-        self.pool = []
-        self.senderq = Queue()
+        manager = multiprocessing.Manager()
+        self.senderq = manager.Queue()
+        self.cache = manager.dict()
         self.readers = readers
         self.interval = interval
         if conf:
             self.conf = ConfigReader(conf)
         self.resolvers = self.load_resolvers()
         self.value_modifiers = self.load_value_modifiers()
-
-    def init_readers(self):
-        for i in range(0, self.readers):
-            readth = ReaderThread(self.readerq, self.senderq)
-            readth.start()
-            self.pool.append(readth)
-
-    def stop_readers(self):
-        for w in self.pool:
-            w.stop()
 
     def init_senders(self):
         self.sender_manager = SenderManager(
@@ -92,13 +80,13 @@ class Main:
     def load_resolvers(self):
         resolvers = {}
         for entry in iter_entry_points(group="resolvers"):
-            resolvers[entry.name] = entry.load()()
+            resolvers[entry.name] = entry.load()(cache=self.cache)
         return resolvers
 
     def load_value_modifiers(self):
         mods = {}
         for entry in iter_entry_points(group="value_modifiers"):
-            mods[entry.name] = entry.load()()
+            mods[entry.name] = entry.load()(cache=self.cache)
         return mods
 
     def load_devices(self):
@@ -113,26 +101,26 @@ class Main:
         yappi.start()
         self.load_devices()
         self.init_senders()
-        self.init_readers()
         try:
             while(True):
                 if (times == 0):
                     break
                 start_time = time.time()
+                pool = multiprocessing.Pool(self.readers)
                 """fill reader queue"""
-                for d in self.devices:
-                    self.readerq.put(d)
-                self.readerq.join()
-#                self.senderq.join()
+                pool.map(
+                    r_worker,
+                    [(dev, self.senderq) for dev in self.devices]
+                )
+                pool.close()
+                pool.join()
                 delta = time.time() - start_time
                 if delta < self.interval:
                     time.sleep(self.interval - delta)
                 if (times > 0):
                     times -= 1
         except (KeyboardInterrupt, SystemExit):
-            self.stop_readers()
             self.stop_senders()
-        self.stop_readers()
         self.stop_senders()
         yappi.get_func_stats().save("/home/master/netsnmp.pstat", type="pstat")
 
@@ -163,35 +151,9 @@ class ConfigReader:
         return tsd_list
 
 
-class ReaderThread(threading.Thread):
-    def __init__(self, rqueue, squeue):
-        super(ReaderThread, self).__init__()
-        self.rqueue = rqueue
-        self.squeue = squeue
-        self.daemon = True
-        self._stop = False
-
-    def run(self):
-        logging.info("Starting ReaderThread")
-        while self._stop is False:
-            try:
-                device = self.rqueue.get_nowait()
-                self.rqueue.task_done()
-                logging.info("Startring with %s", device.hostname)
-                data = device.poll()
-                logging.info("done with %s", device.hostname)
-                for row in data:
-                    self.squeue.put(row)
-            except Empty:
-                time.sleep(0.3)
-                logging.debug("Read queue empty")
-            except:
-                logging.error("Unexpected error:", sys.exc_info()[0])
-                raise
-            finally:
-                next
-        return
-
-    def stop(self):
-        logging.info("Stopping ReaderThread")
-        self._stop = True
+def r_worker(args):
+    device = args[0]
+    send_queue = args[1]
+    data = device.poll()
+    for row in data:
+        send_queue.put(row)

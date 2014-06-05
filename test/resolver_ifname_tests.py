@@ -22,11 +22,11 @@ class ifname_tests(object):
         self.device.snmp.walk = Mock(return_value={"1": "eth0", "2": "eth1"})
 
     def test_resolve(self):
-        r = IfName()
+        r = IfName(dict())
         # cache is empty
-        ok_(not IfName.cache)
+        ok_(not r.cache)
         ret = r.resolve("1", self.device)
-        ok_("foobar" in IfName.cache)
+        ok_("foobar" in r.cache)
         #throw exceprion if the value is not taken from cache
         self.device.snmp.walk = Mock(side_effect=Exception())
         eq_("eth0", ret["interface"])

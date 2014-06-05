@@ -57,7 +57,9 @@ class Metric:
                     tags.items()
                     + resolved.items()
                 )
-        tagstr = self._tags_to_str(tags)
+        tagstr = ''
+        if tags:
+            tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
             dp = self.value_modifier.modify(
@@ -67,13 +69,13 @@ class Metric:
             )
         if not dp:
             return None
-        buf = "put {0} {1} {2} {3}".format(
-            self.name, int(ts), dp, tagstr
+        buf = "put {0} {1} {2}{3} host={4}".format(
+            self.name, int(ts), dp, tagstr, self.host
         )
         return buf
 
     def _tags_to_str(self, tagsdict):
-        buf = "host=" + self.host
+        buf = ""
         for key, val in tagsdict.items():
             buf += " " + str(key) + "=" + str(val)
         return buf

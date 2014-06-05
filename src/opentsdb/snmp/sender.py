@@ -10,11 +10,10 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 import socket
-import threading
+import multiprocessing
 import random
 import time
 import logging
-from Queue import Empty
 
 
 class SenderManager:
@@ -25,13 +24,12 @@ class SenderManager:
     def __init__(self, squeue, tsd_list):
         self.workers = []
         for host, port in tsd_list:
-            for i in range(0,1):
-                st = SenderThread(
-                    squeue=squeue,
-                    host=host,
-                    port=port
-                )
-                self.workers.append(st)
+            st = SenderThread(
+                squeue=squeue,
+                host=host,
+                port=port
+            )
+            self.workers.append(st)
 
     def run(self):
         logging.debug("SenderManager: starting senders")
@@ -131,9 +129,8 @@ class TSDConnection:
 
     def send_data(self, data):
         out = ''
-
-#        for line in data:
-#            logging.debug('SENDING: %s', line)
+        for line in data:
+            logging.debug('SENDING: %s', line)
 
         out = "\n".join(data)
 
@@ -155,7 +152,7 @@ class TSDConnection:
         return False
 
 
-class SenderThread(threading.Thread):
+class SenderThread(multiprocessing.Process):
     def __init__(self, squeue, host, port, queue_timeout=5):
         super(SenderThread, self).__init__()
         self.squeue = squeue
@@ -182,12 +179,12 @@ class SenderThread(threading.Thread):
                 self.squeue.task_done()
                 if len(senddata) > 100:
                     break
-            except Empty:
+            except Exception:
                 #logging.debug("Queue empty")
                 break
         if len(senddata) > 0:
             while not self.tsd.send_data(senddata):
-                time.sleep(10)
+                time.sleep(1)
 
     def run(self):
         logging.debug("Starting SenterThread %s %s", self.host, self.port)

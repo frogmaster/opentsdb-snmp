@@ -9,7 +9,12 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+
+
 class AfterIndex:
+    def __init__(self, cache=None):
+        self.cache = cache
+
     def resolve(self, index, device=None):
         tags = {}
         buf = ("%s" % index).split(".")

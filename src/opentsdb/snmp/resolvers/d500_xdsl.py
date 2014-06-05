@@ -9,7 +9,12 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+
+
 class D500_xdsl:
+    def __init__(self, cache=None):
+        self.cache = cache
+
     def resolve(self, index, device=None):
         card = int(str(index)[:-2])
         port = int(str(index)[-2:])
