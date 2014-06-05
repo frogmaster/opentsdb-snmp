@@ -69,13 +69,13 @@ class Metric:
             )
         if not dp:
             return None
-        buf = "put {0} {1} {2}{3} host={4}".format(
+        buf = "put {0} {1} {2} {3}".format(
             self.name, int(ts), dp, tagstr, self.host
         )
         return buf
 
     def _tags_to_str(self, tagsdict):
-        buf = ""
+        buf = "host=" + self.host
         for key, val in tagsdict.items():
             buf += " " + str(key) + "=" + str(val)
         return buf
