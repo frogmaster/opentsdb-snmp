@@ -91,7 +91,7 @@ class TSDConnection:
 
         # we use the version command as it is very low effort for the TSD
         # to respond
-        logging.debug('verifying our TSD connection is alive')
+        # logging.debug('verifying our TSD connection is alive')
         try:
             self.socket.sendall('version\n')
         except socket.error:
@@ -129,7 +129,6 @@ class TSDConnection:
 
     def send_data(self, data):
         out = ''
-
         for line in data:
             logging.debug('SENDING: %s', line)
 
@@ -161,6 +160,7 @@ class SenderThread(multiprocessing.Process):
         self.port = port
         self.tsd = TSDConnection(host=host, port=port)
         self._stop = False
+        self.daemon = True
         self.queue_timeout = queue_timeout
 
     def stop(self):
@@ -183,9 +183,8 @@ class SenderThread(multiprocessing.Process):
                 #logging.debug("Queue empty")
                 break
         if len(senddata) > 0:
-            if not self.tsd.send_data(senddata):
-                for line in senddata:
-                    self.squeue.put(line)
+            while not self.tsd.send_data(senddata):
+                time.sleep(1)
 
     def run(self):
         logging.debug("Starting SenterThread %s %s", self.host, self.port)
