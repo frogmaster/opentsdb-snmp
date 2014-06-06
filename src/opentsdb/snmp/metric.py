@@ -16,7 +16,7 @@ class Metric:
     'Metric class'
     def __init__(self, data, device):
         self.name = data["metric"]
-        self.tags = data["tags"]
+        self.tags = data["tags"] or {}
         self.oid = data["oid"]
         self.host = device.hostname
         self.value_modifier = None
@@ -57,9 +57,7 @@ class Metric:
                     tags.items()
                     + resolved.items()
                 )
-        tagstr = ''
-        if tags:
-            tagstr = self._tags_to_str(tags)
+        tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
             dp = self.value_modifier.modify(
@@ -67,7 +65,7 @@ class Metric:
                 ts=ts,
                 value=dp
             )
-        if not dp:
+        if dp is None:
             return None
         buf = "put {0} {1} {2} {3}".format(
             self.name, int(ts), dp, tagstr, self.host
