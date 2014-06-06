@@ -18,9 +18,9 @@ import yaml
 import argparse
 import logging
 import yappi
+import traceback
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
-logging.basicConfig(level=logging.DEBUG)
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -39,10 +39,18 @@ parser.add_argument(
     "-t", "--times", dest="times", default=-1,
     help="Number of times to loop"
 )
+parser.add_argument(
+    "-l", "--loglevel", dest="loglevel", default="info",
+    help="Number of times to loop"
+)
 
 
 def run():
     args = parser.parse_args()
+    numeric_level = getattr(logging, args.loglevel.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % args.loglevel)
+    logging.basicConfig(level=numeric_level)
 
     if not args.conffile:
         raise SystemExit("Must specify configuration file with --config")
@@ -154,6 +162,11 @@ class ConfigReader:
 def r_worker(args):
     device = args[0]
     send_queue = args[1]
-    data = device.poll()
-    for row in data:
-        send_queue.put(row)
+    try:
+        data = device.poll()
+        for row in data:
+            send_queue.put(row)
+    except Exception:
+        print('Caught exception in worker thread:')
+        traceback.print_exc()
+        print()
