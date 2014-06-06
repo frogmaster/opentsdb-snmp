@@ -17,7 +17,6 @@ from opentsdb.snmp.sender import SenderManager
 import yaml
 import argparse
 import logging
-import yappi
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
 logging.basicConfig(level=logging.DEBUG)
@@ -98,7 +97,6 @@ class Main:
         return self.devices
 
     def run(self, times=-1):
-        yappi.start()
         self.load_devices()
         self.init_senders()
         try:
@@ -122,7 +120,6 @@ class Main:
         except (KeyboardInterrupt, SystemExit):
             self.stop_senders()
         self.stop_senders()
-        yappi.get_func_stats().save("/home/master/netsnmp.pstat", type="pstat")
 
 
 class ConfigReader:
