@@ -10,6 +10,7 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 import time
+import logging
 
 
 class Metric:
@@ -83,6 +84,7 @@ class Metric:
         return data
 
     def get_opentsdb_commands(self, snmp):
+        logging.debug("getting metric %s from %s", self.name, self.host)
         if self.walk:
             raw = self._get_walk(snmp)
             return self._process_walk_data(raw)
