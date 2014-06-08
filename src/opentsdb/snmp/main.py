@@ -82,6 +82,8 @@ class Main:
         self.sender_manager.run()
 
     def stop_senders(self):
+        while not self.senderq.empty():
+            time.sleep(10)
         self.sender_manager.stop()
 
     def load_resolvers(self):
