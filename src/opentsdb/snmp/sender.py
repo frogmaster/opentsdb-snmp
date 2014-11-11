@@ -24,12 +24,13 @@ class SenderManager:
     def __init__(self, squeue, tsd_list):
         self.workers = []
         for host, port in tsd_list:
-            st = SenderThread(
-                squeue=squeue,
-                host=host,
-                port=port
-            )
-            self.workers.append(st)
+            for i in range(0, 1):
+                st = SenderThread(
+                    squeue=squeue,
+                    host=host,
+                    port=port
+                )
+                self.workers.append(st)
 
     def run(self):
         logging.debug("SenderManager: starting senders")
