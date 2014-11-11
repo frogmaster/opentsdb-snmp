@@ -17,7 +17,6 @@ from opentsdb.snmp.sender import SenderManager
 import yaml
 import argparse
 import logging
-import yappi
 import traceback
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
@@ -83,6 +82,8 @@ class Main:
         self.sender_manager.run()
 
     def stop_senders(self):
+        while not self.senderq.empty():
+            time.sleep(10)
         self.sender_manager.stop()
 
     def load_resolvers(self):
@@ -106,7 +107,6 @@ class Main:
         return self.devices
 
     def run(self, times=-1):
-        yappi.start()
         self.load_devices()
         self.init_senders()
         try:
@@ -130,7 +130,6 @@ class Main:
         except (KeyboardInterrupt, SystemExit):
             self.stop_senders()
         self.stop_senders()
-        yappi.get_func_stats().save("/home/master/netsnmp.pstat", type="pstat")
 
 
 class ConfigReader:

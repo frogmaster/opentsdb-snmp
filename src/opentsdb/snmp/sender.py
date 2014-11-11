@@ -178,7 +178,7 @@ class SenderThread(multiprocessing.Process):
                 line = self.squeue.get(True, self.queue_timeout)
                 senddata.append(line)
                 self.squeue.task_done()
-                if len(senddata) > 100:
+                if len(senddata) > 200000:
                     break
             except Exception:
                 #logging.debug("Queue empty")

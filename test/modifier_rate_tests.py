@@ -21,9 +21,9 @@ class rate_tests(object):
         ok_(not m.cache)
         result = m.modify(key="foo", ts=100, value=1000)
         ok_(result is None)
-        ok_("foo" in m.cache)
-        eq_(100, m.cache["foo"]["ts"])
-        eq_(1000, m.cache["foo"]["value"])
+        ok_("rate_foo" in m.cache)
+        eq_(100, m.cache["rate_foo"]["ts"])
+        eq_(1000, m.cache["rate_foo"]["value"])
         result = m.modify(key="foo", ts=200, value=2000)
         eq_(10, result)
 
@@ -31,3 +31,6 @@ class rate_tests(object):
         m.modify(key="foo", ts=300, value=((2 ** 32) - 500))
         result = m.modify(key="foo", ts=400, value=500)
         eq_(10, result)
+        #test zero rate:
+        result = m.modify(key="foo", ts=500, value=500)
+        eq_(0, result)

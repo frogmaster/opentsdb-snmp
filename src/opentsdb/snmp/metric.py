@@ -10,13 +10,14 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 import time
+import logging
 
 
 class Metric:
     'Metric class'
     def __init__(self, data, device):
         self.name = data["metric"]
-        self.tags = data["tags"]
+        self.tags = data["tags"] or {}
         self.oid = data["oid"]
         self.host = device.hostname
         self.value_modifier = None
@@ -57,9 +58,7 @@ class Metric:
                     tags.items()
                     + resolved.items()
                 )
-        tagstr = ''
-        if tags:
-            tagstr = self._tags_to_str(tags)
+        tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
             dp = self.value_modifier.modify(
@@ -67,15 +66,15 @@ class Metric:
                 ts=ts,
                 value=dp
             )
-        if not dp:
+        if dp is None:
             return None
-        buf = "put {0} {1} {2}{3} host={4}".format(
+        buf = "put {0} {1} {2} {3}".format(
             self.name, int(ts), dp, tagstr, self.host
         )
         return buf
 
     def _tags_to_str(self, tagsdict):
-        buf = ""
+        buf = "host=" + self.host
         for key, val in tagsdict.items():
             buf += " " + str(key) + "=" + str(val)
         return buf
@@ -85,6 +84,7 @@ class Metric:
         return data
 
     def get_opentsdb_commands(self, snmp):
+        logging.debug("getting metric %s from %s", self.name, self.host)
         if self.walk:
             raw = self._get_walk(snmp)
             return self._process_walk_data(raw)

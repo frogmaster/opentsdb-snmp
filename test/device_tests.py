@@ -72,14 +72,14 @@ class TestMetric(object):
             device=self.mockdevice
         )
         #test _tags_to_str with empty tags
-        eq_("", m._tags_to_str({}))
+        eq_("host=foo", m._tags_to_str({}))
         walkdata = m._get_walk(self.mockdevice.snmp)
         eq_(10, walkdata["1"])
         eq_(20, walkdata["2"])
         eq_(
             "put interface.packets "
             + str(int(self.time)) +
-            " 20 index=2 direction=in type=broadcast host=foo",
+            " 20 host=foo index=2 direction=in type=broadcast",
             m._process_dp(20, 2)
         )
         result = m._process_walk_data(walkdata)
@@ -87,7 +87,7 @@ class TestMetric(object):
         eq_(
             'put interface.packets '
             + str(int(self.time)) +
-            ' 10 index=1 direction=in type=broadcast host=foo',
+            ' 10 host=foo index=1 direction=in type=broadcast',
             result[0]
         )
         result = m.get_opentsdb_commands(self.mockdevice.snmp)
@@ -95,7 +95,7 @@ class TestMetric(object):
         eq_(
             'put interface.packets '
             + str(int(self.time)) +
-            ' 10 index=1 direction=in type=broadcast host=foo',
+            ' 10 host=foo index=1 direction=in type=broadcast',
             result[0]
         )
 

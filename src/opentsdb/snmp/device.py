@@ -45,6 +45,6 @@ class Device:
             return []
         data = []
         for m in self.metrics:
-            data = data + m.get_opentsdb_commands(self.snmp)
+            data.extend(m.get_opentsdb_commands(self.snmp))
         self.close_snmp()
         return data
