@@ -26,7 +26,7 @@ class TestDevice(object):
             'metrics': ["ifInUcastPkts"]
         }
         main = Main(conf="misc/sample_conf.yml")
-        main.load_resolvers
+        main.load_resolvers()
         self.tested = Device(d, main.resolvers,
                              main.value_modifiers, main.conf.metrics())
 
