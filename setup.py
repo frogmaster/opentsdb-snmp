@@ -45,8 +45,13 @@ setuptools.setup(
         "resolvers": [
             "default=opentsdb.snmp.resolvers.default:Default",
             "ifname=opentsdb.snmp.resolvers.ifname:IfName",
-            "direction_after_idx=opentsdb.snmp.resolvers.after_idx:AfterIndex",
+            "after_idx=opentsdb.snmp.resolvers.after_idx:AfterIndex",
+            "after_idx_ifname=opentsdb.snmp.resolvers.after_idx_ifname:AfterIndexIfname",
+            "ma5616_channel=opentsdb.snmp.resolvers.ma5616_channel:HwdslamChannel",
             "d500_xdsl=opentsdb.snmp.resolvers.d500_xdsl:D500_xdsl",
+            "isam_nfxsa_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSA",
+            "isam_nfxsb_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSB",
+            "isam_old_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamOld",
         ],
         "value_modifiers": [
             "rate=opentsdb.snmp.value_modifiers.rate:Rate",
