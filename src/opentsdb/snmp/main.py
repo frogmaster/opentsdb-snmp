@@ -18,6 +18,7 @@ import yaml
 import argparse
 import logging
 import traceback
+import os
 #DEFAULT_LOG = '/var/log/tcollector.log'
 #LOG = logging.getLogger('tcollector')
 parser = argparse.ArgumentParser()
@@ -146,7 +147,24 @@ class ConfigReader:
         return self.hostlist
 
     def metrics(self):
-        return self.data["metrics"]
+        m = dict()
+        if "metrics_dir" in self.data:
+            path = self.data["metrics_dir"]
+            m.update(self.load_metrics_from_dir(path))
+        if "metrics" in self.data:
+            m.update(self.data["metrics"])
+        return m
+
+    def load_metrics_from_dir(self, path):
+        metrics = dict()
+        files = [
+            os.path.join(path, f) for f in os.listdir(path)
+            if os.path.isfile(os.path.join(path, f))
+            and f.endswith(".yml")
+        ]
+        for f in files:
+            metrics.update(self.load_file(f).items())
+        return metrics
 
     def tsd_list(self):
         tsd_list = []
