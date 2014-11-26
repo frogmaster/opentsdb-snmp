@@ -41,33 +41,33 @@ class SNMPSession:
             if v.iid or v.iid == 0:
                 full_oid = v.tag + "." + v.iid
             if stripoid:
-                full_oid = full_oid.replace(oid, '')
-                full_oid = full_oid.replace(".", '')
-            ret[full_oid] = v.val
+                full_oid = full_oid.replace(oid + ".", '')
+            if v.type == "OCTETSTR":
+                ret[full_oid] = int(v.val.encode("hex"), 16)
+            else:
+                ret[full_oid] = v.val
         return ret
 
     def walk(self, oid, stripoid=True):
         ret = {}
-        startindexpos = 0
+        if oid[0] != ".":
+            oid = "." + oid
+        startindexpos = None
         runningtreename = oid
 
-        while (runningtreename == oid):
+        while (runningtreename.startswith(oid)):
             vrs = VarList(Varbind(oid, startindexpos))
             result = self.session.getbulk(0, 30, vrs)
             if not result:
                 break
             """ Print output from running getbulk"""
             for i in vrs:
-                full_oid = i.tag
-                if i.tag != oid:
-                    runningtreename = i.tag
+                if not i.tag.startswith(oid):
                     break
-                if i.iid or i.iid == 0:
-                    full_oid = i.tag + "." + i.iid
+                (full_oid, val) = handle_vb(i)
                 if stripoid:
-                    full_oid = full_oid.replace(oid, '')
-                    full_oid = full_oid.replace(".", '')
-                ret[full_oid] = i.val
+                    full_oid = full_oid.replace(oid + ".", "")
+                ret[full_oid] = val
             """ Set startindexpos for next getbulk """
             if not vrs[-1].iid:
                 break
@@ -79,3 +79,14 @@ class SNMPSession:
 
     def get(self, oid):
         return self.session.get(oid)[0]
+
+
+def handle_vb(vb):
+    if vb.iid or vb.iid == 0:
+        full_oid = vb.tag + "." + vb.iid
+    else:
+        full_oid = vb.tag
+    if vb.type == "OCTETSTR":
+        return (full_oid, int(vb.val.encode("hex"), 16))
+    else:
+        return (full_oid,  vb.val)
