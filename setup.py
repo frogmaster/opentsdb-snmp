@@ -50,7 +50,9 @@ setuptools.setup(
             "ma5616_channel=opentsdb.snmp.resolvers.ma5616_channel:HwdslamChannel",
             "d500_xdsl=opentsdb.snmp.resolvers.d500_xdsl:D500_xdsl",
             "isam_nfxsa_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSA",
+            "isam_nfxsa_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSAOctets",
             "isam_nfxsb_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSB",
+            "isam_nfxsb_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSBOctets",
             "isam_old_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamOld",
         ],
         "value_modifiers": [

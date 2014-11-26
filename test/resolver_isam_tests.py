@@ -10,7 +10,7 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 from nose.tools import eq_
-from opentsdb.snmp.resolvers.isam_xdsl import IsamNFXSB, IsamNFXSA, IsamOld
+from opentsdb.snmp.resolvers.isam_xdsl import *
 
 
 class TestISAM(object):
@@ -45,6 +45,29 @@ class TestISAM(object):
         for item in testdata:
             tags = resolver.resolve(item["index"])
             eq_(item["expected"], tags["interface"])
+
+    def test_IsamNFXSBOctets_resolver(self):
+        resolver = IsamNFXSBOctets()
+        testdata = [
+            {"index": "67493888.101",  "expected": "1/1/4/48"},
+            {"index": "671277056.101", "expected": "2/3/1/24"},
+        ]
+        for item in testdata:
+            tags = resolver.resolve(item["index"])
+            eq_(item["expected"], tags["interface"])
+            eq_(101, tags["vlan"])
+
+    def test_IsamNFXSAOctets_resolver(self):
+        resolver = IsamNFXSAOctets()
+        testdata = [
+            {"index": "67231744.101", "expected": "1/1/1/16"},
+            {"index": "570425344.101", "expected": "1/1/19/1"},
+        ]
+        for item in testdata:
+            tags = resolver.resolve(item["index"])
+            eq_(item["expected"], tags["interface"])
+            eq_(101, tags["vlan"])
+
 
     def test_IsamOld_resolver(self):
         resolver = IsamOld()

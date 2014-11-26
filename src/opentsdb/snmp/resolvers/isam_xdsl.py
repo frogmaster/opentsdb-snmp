@@ -11,7 +11,7 @@
 # see <http://www.gnu.org/licenses/>.
 
 
-class IsamNFXSA:
+class IsamNFXSA(object):
     def __init__(self, cache=None):
         self.cache = cache
 
@@ -28,7 +28,7 @@ class IsamNFXSA:
         return {"interface": interface}
 
 
-class IsamNFXSB:
+class IsamNFXSB(object):
     def __init__(self, cache=None):
         self.cache = cache
 
@@ -51,7 +51,35 @@ class IsamNFXSB:
         return {"interface": interface}
 
 
-class IsamOld:
+class _SplitIndexVlan(object):
+    def __init__(self, cache=None):
+        self.cache = cache
+
+    def resolve(self, index, device=None):
+        tags = {}
+        buf = ("%s" % index).split(".")
+        tags["index"] = int(buf[0])
+        tags["vlan"] = int(buf[1])
+        return tags
+
+
+class IsamNFXSAOctets(_SplitIndexVlan):
+    def resolve(self, index, device=None):
+        tags = super(IsamNFXSAOctets, self).resolve(index, device)
+        interface_tags = IsamNFXSA().resolve(tags["index"], device)
+        tags.update(interface_tags)
+        return tags
+
+
+class IsamNFXSBOctets(_SplitIndexVlan):
+    def resolve(self, index, device=None):
+        tags = super(IsamNFXSBOctets, self).resolve(index, device)
+        interface_tags = IsamNFXSB().resolve(tags["index"], device)
+        tags.update(interface_tags)
+        return tags
+
+
+class IsamOld(object):
     def __init__(self, cache=None):
         self.cache = cache
 
