@@ -16,7 +16,7 @@ class IsamNFXSA(object):
         self.cache = cache
 
     def resolve(self, index, device=None):
-        bstr = "{:032b}".format(index)
+        bstr = "{:032b}".format(int(index))
         slot = int(bstr[1:7], 2)
         port = int(bstr[11:19], 2) + 1
         if slot < 10:
@@ -33,7 +33,7 @@ class IsamNFXSB(object):
         self.cache = cache
 
     def resolve(self, index, device=None):
-        bstr = "{:032b}".format(index)
+        bstr = "{:032b}".format(int(index))
         rack = int(bstr[1:4], 2)
         shelf = int(bstr[4:6], 2)
         slot = int(bstr[6:7], 2)
@@ -84,7 +84,7 @@ class IsamOld(object):
         self.cache = cache
 
     def resolve(self, index, device=None):
-        hstr = "{:x}".format(index)
+        hstr = "{:x}".format(int(index))
 
         rack = int(hstr[0:1], 16)
         shelf = int(hstr[1:2], 16)

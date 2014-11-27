@@ -17,15 +17,15 @@ class TestISAM(object):
     def test_IsamNFXSB_resolver(self):
         resolver = IsamNFXSB()
         testdata = [
-            {"index": 67108864,  "expected": "1/1/4/1"},
-            {"index": 67125248,  "expected": "1/1/4/3"},
-            {"index": 67493888,  "expected": "1/1/4/48"},
-            {"index": 134217728, "expected": "1/1/6/1"},
-            {"index": 134455296, "expected": "1/1/6/30"},
-            {"index": 536920064, "expected": "2/1/1/7"},
-            {"index": 537247744, "expected": "2/1/1/47"},
-            {"index": 604028928, "expected": "2/2/1/7"},
-            {"index": 671277056, "expected": "2/3/1/24"},
+            {"index": "67108864",  "expected": "1/1/4/1"},
+            {"index": "67125248",  "expected": "1/1/4/3"},
+            {"index": "67493888",  "expected": "1/1/4/48"},
+            {"index": "134217728", "expected": "1/1/6/1"},
+            {"index": "134455296", "expected": "1/1/6/30"},
+            {"index": "536920064", "expected": "2/1/1/7"},
+            {"index": "537247744", "expected": "2/1/1/47"},
+            {"index": "604028928", "expected": "2/2/1/7"},
+            {"index": "671277056", "expected": "2/3/1/24"},
         ]
 
         for item in testdata:
@@ -35,11 +35,11 @@ class TestISAM(object):
     def test_IsamNFXSA_resolver(self):
         resolver = IsamNFXSA()
         testdata = [
-            {"index": 67231744, "expected": "1/1/1/16"},
-            {"index": 101048320, "expected": "1/1/2/48"},
-            {"index": 302333952, "expected": "1/1/8/43"},
-            {"index": 335929344, "expected": "1/1/12/48"},
-            {"index": 570425344, "expected": "1/1/19/1"},
+            {"index": "67231744", "expected": "1/1/1/16"},
+            {"index": "101048320", "expected": "1/1/2/48"},
+            {"index": "302333952", "expected": "1/1/8/43"},
+            {"index": "335929344", "expected": "1/1/12/48"},
+            {"index": "570425344", "expected": "1/1/19/1"},
         ]
 
         for item in testdata:
