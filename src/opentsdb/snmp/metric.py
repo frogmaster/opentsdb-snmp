@@ -19,6 +19,9 @@ class Metric:
         self.name = data["metric"]
         self.tags = data["tags"] or {}
         self.oid = data["oid"]
+        self.multiply = None
+        if "multiply" in data:
+            self.multiply = float(data["multiply"])
         self.host = device.hostname
         self.value_modifier = None
         if data["type"] == "walk":
@@ -68,6 +71,8 @@ class Metric:
             )
         if dp is None:
             return None
+        if self.multiply:
+            dp = dp * self.multiply
         buf = "put {0} {1} {2} {3}".format(
             self.name, int(ts), dp, tagstr, self.host
         )

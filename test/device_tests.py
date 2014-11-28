@@ -61,6 +61,7 @@ class TestMetric(object):
             'metric': 'interface.packets',
             'oid': '.1.3.6.1.2.1.31.1.1.1.9',
             'type': 'walk',
+            'multiply': '0.1',
             'tags': {
                 'direction': "in",
                 'type': 'broadcast'
@@ -79,7 +80,7 @@ class TestMetric(object):
         eq_(
             "put interface.packets "
             + str(int(self.time)) +
-            " 20 host=foo index=2 direction=in type=broadcast",
+            " 2.0 host=foo index=2 direction=in type=broadcast",
             m._process_dp(20, 2)
         )
         result = m._process_walk_data(walkdata)
@@ -87,7 +88,7 @@ class TestMetric(object):
         eq_(
             'put interface.packets '
             + str(int(self.time)) +
-            ' 10 host=foo index=1 direction=in type=broadcast',
+            ' 1.0 host=foo index=1 direction=in type=broadcast',
             result[0]
         )
         result = m.get_opentsdb_commands(self.mockdevice.snmp)
@@ -95,7 +96,7 @@ class TestMetric(object):
         eq_(
             'put interface.packets '
             + str(int(self.time)) +
-            ' 10 host=foo index=1 direction=in type=broadcast',
+            ' 1.0 host=foo index=1 direction=in type=broadcast',
             result[0]
         )
 
