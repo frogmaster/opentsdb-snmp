@@ -72,7 +72,7 @@ class Metric:
         if dp is None:
             return None
         if self.multiply:
-            dp = dp * self.multiply
+            dp = float(dp) * self.multiply
         buf = "put {0} {1} {2} {3}".format(
             self.name, int(ts), dp, tagstr, self.host
         )
