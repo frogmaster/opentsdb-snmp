@@ -25,7 +25,7 @@ class SNMPSession:
             Community=self.community,
             Version=self.version,
             UseNumeric=1,
-            Timeout=1000000,
+            Timeout=2000000,
             Retries=0,
         )
 
@@ -57,7 +57,8 @@ class SNMPSession:
 
         while (runningtreename.startswith(oid)):
             vrs = VarList(Varbind(oid, startindexpos))
-            result = self.session.getbulk(0, 30, vrs)
+            result = self.session.getbulk(0, 100, vrs)
+            key = None
             if not result:
                 break
             """ Print output from running getbulk"""
@@ -65,13 +66,15 @@ class SNMPSession:
                 if not i.tag.startswith(oid):
                     break
                 (full_oid, val) = handle_vb(i)
+                key = full_oid.replace(oid + ".", "")
                 if stripoid:
-                    full_oid = full_oid.replace(oid + ".", "")
-                ret[full_oid] = val
+                    ret[key] = val
+                else:
+                    ret[full_oid] = val
             """ Set startindexpos for next getbulk """
-            if not vrs[-1].iid:
+            if not vrs[-1].iid or not key:
                 break
-            startindexpos = int(vrs[-1].iid)
+            startindexpos = int(key.split(".")[0])
             """ Refresh runningtreename from last result"""
             runningtreename = vrs[-1].tag
 
