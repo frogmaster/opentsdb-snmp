@@ -9,6 +9,7 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+import logging
 
 
 class IsamNFXSA(object):
@@ -93,3 +94,72 @@ class IsamOld(object):
 
         interface = "{0}/{1}/{2}/{3}".format(rack, shelf, slot, port)
         return {"interface": interface}
+
+
+class Dot1dBasePortIfIndex(object):
+    def __init__(self, cache=None):
+        self.cache = cache
+        if "ISAMOCTETS" not in self.cache:
+            self.cache["ISAMOCTETS"] = dict()
+
+    def get_dot1dbaseport(self, snmp):
+        data = snmp.walk('.1.3.6.1.2.1.17.1.4.1.2')
+        if not data:
+            raise Exception("SNMP walk failed")
+        return data
+
+    def get_atmVCLMapAtmIfIndex(self, snmp):
+        data = snmp.walk('.1.3.6.1.4.1.637.61.1.4.1.73.1.1')
+        if not data:
+            raise Exception("SNMP walk failed")
+        return data
+
+    def get_map(self, snmp):
+        dot1d = self.get_dot1dbaseport(snmp)
+        atm = self.get_atmVCLMapAtmIfIndex(snmp)
+        ret = dict()
+
+        for key, val in dot1d.iteritems():
+            val = "{0}".format(val)
+            if val in atm:
+                ret[key] = atm[val]
+            else:
+                ret[key] = -1
+        return ret
+
+    def resolve(self, baseport, device=None):
+        snmp = device.snmp
+        name = "ISAMOCTETS"
+        hostname = device.hostname
+        if hostname not in self.cache[name]:
+            self.cache[name][hostname] = self.get_map(snmp)
+
+        baseport = str(baseport)
+        if baseport in self.cache[name][hostname]:
+            if self.cache[name][hostname][baseport] is not -1:
+                return {"index": self.cache[name][hostname][baseport]}
+            else:
+                logging.debug("Non atm interface, don't care")
+                return None
+        else:
+            #baseport is dynamic, maybe it's been added, re-init the cache
+            self.cache[name][hostname] = self.get_map(snmp)
+            if baseport in self.cache[name][hostname]:
+                if self.cache[name][hostname][baseport] is not -1:
+                    return {"index": self.cache[name][hostname][baseport]}
+                else:
+                    logging.debug("Non atm interface, don't care")
+                    return None
+            else:
+                logging.debug("Cache miss: %s %s not in %s",
+                              hostname, baseport, hostname)
+
+
+class IsamOldOctets(Dot1dBasePortIfIndex):
+    def resolve(self, index, device=None):
+        tags = _SplitIndexVlan().resolve(index, device=device)
+        tags = super(IsamOldOctets, self).resolve(tags["index"], device)
+
+        interface_tags = IsamOld().resolve(tags["index"], device)
+        tags.update(interface_tags)
+        return tags

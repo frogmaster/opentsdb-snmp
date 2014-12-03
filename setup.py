@@ -54,6 +54,7 @@ setuptools.setup(
             "isam_nfxsb_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSB",
             "isam_nfxsb_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSBOctets",
             "isam_old_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamOld",
+            "isam_old_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamOldOctets",
         ],
         "value_modifiers": [
             "rate=opentsdb.snmp.value_modifiers.rate:Rate",

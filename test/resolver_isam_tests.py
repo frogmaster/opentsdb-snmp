@@ -11,9 +11,14 @@
 # see <http://www.gnu.org/licenses/>.
 from nose.tools import eq_
 from opentsdb.snmp.resolvers.isam_xdsl import *
-
+from mock import Mock
 
 class TestISAM(object):
+    def setup(self):
+        self.device = Mock()
+        self.device.hostname = "foobar"
+        self.device.snmp = Mock()
+
     def test_IsamNFXSB_resolver(self):
         resolver = IsamNFXSB()
         testdata = [
@@ -68,7 +73,6 @@ class TestISAM(object):
             eq_(item["expected"], tags["interface"])
             eq_(101, tags["vlan"])
 
-
     def test_IsamOld_resolver(self):
         resolver = IsamOld()
         testdata = [
@@ -83,3 +87,18 @@ class TestISAM(object):
         for item in testdata:
             tags = resolver.resolve(item["index"])
             eq_(item["expected"], tags["interface"])
+
+    def test_IsamOldOctets_resolver(self):
+        r = IsamOldOctets(dict())
+
+        def walk_side_effect(arg):
+            if (arg == ".1.3.6.1.2.1.17.1.4.1.2"):
+                return {"417": 136314880, "418": 136314912}
+            else:
+                return {"136314880": 285421568, "136314912": 285421568}
+
+        self.device.snmp.walk = Mock()
+        self.device.snmp.walk.side_effect = walk_side_effect
+        tags = r.resolve("417.1500", self.device)
+
+        eq_('1/1/4/1', tags["interface"])
