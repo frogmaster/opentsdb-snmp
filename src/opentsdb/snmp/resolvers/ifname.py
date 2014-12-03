@@ -15,6 +15,8 @@ import logging
 class IfName:
     def __init__(self, cache=None):
         self.cache = cache
+        if "IfName" not in self.cache:
+            self.cache["IfName"] = {}
 
     def get_ifnames(self, snmp):
         data = snmp.walk('.1.3.6.1.2.1.31.1.1.1.1')
@@ -25,10 +27,10 @@ class IfName:
     def resolve(self, index, device=None):
         snmp = device.snmp
         hostname = device.hostname
-        if hostname not in self.cache:
-            self.cache[hostname] = self.get_ifnames(snmp)
-        if index in self.cache[hostname]:
-            return {"interface": self.cache[hostname][index]}
+        if hostname not in self.cache["IfName"]:
+            self.cache["IfName"][hostname] = self.get_ifnames(snmp)
+        if index in self.cache["IfName"][hostname]:
+            return {"interface": self.cache["IfName"][hostname][index]}
         else:
-            logging.debug("Cache miss: %s %s not in %s",
-                          hostname, index, self.cache[hostname])
+            logging.debug("IfName Cache miss: %s %s not in %s",
+                          hostname, index, hostname)
