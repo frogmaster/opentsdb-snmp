@@ -131,22 +131,23 @@ class Dot1dBasePortIfIndex(object):
         snmp = device.snmp
         name = "ISAMOCTETS"
         hostname = device.hostname
-        if hostname not in self.cache[name]:
-            self.cache[name][hostname] = self.get_map(snmp)
+        c_key = name + "_" + hostname
+        if c_key not in self.cache:
+            self.cache[c_key] = self.get_map(snmp)
 
         baseport = str(baseport)
-        if baseport in self.cache[name][hostname]:
-            if self.cache[name][hostname][baseport] is not -1:
-                return {"index": self.cache[name][hostname][baseport]}
+        if baseport in self.cache[c_key]:
+            if self.cache[c_key][baseport] is not -1:
+                return {"index": self.cache[c_key][baseport]}
             else:
                 logging.debug("Non atm interface, don't care")
                 return None
         else:
             #baseport is dynamic, maybe it's been added, re-init the cache
-            self.cache[name][hostname] = self.get_map(snmp)
-            if baseport in self.cache[name][hostname]:
-                if self.cache[name][hostname][baseport] is not -1:
-                    return {"index": self.cache[name][hostname][baseport]}
+            self.cache[c_key] = self.get_map(snmp)
+            if baseport in self.cache[c_key]:
+                if self.cache[c_key][baseport] is not -1:
+                    return {"index": self.cache[c_key][baseport]}
                 else:
                     logging.debug("Non atm interface, don't care")
                     return None
