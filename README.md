@@ -42,9 +42,11 @@ Example configuration file:
         oid: "1.3.6.1.2.1.31.1.1.1.11"
         metric: "interface.packets" #metric name on tsd side
         type: "walk" #either walk or get
-        rate: true #wether rate should be calculated
-        multiply: 0.1 #divide value by 10
-        ignore_zeros: True #ignores zero values recieved from agent. Note, this check is before rate calculation.
+        rate: True # default to False wether rate should be calculated
+        multiply: 0.1 #default to None divide value by 10
+        ignore_zeros: True # defaults False ignores zero values recieved from agent. Note, this check is before rate calculation.
+        startidx: 123 # defaults to None. Start walking starting from this index. Note, only applies to single index oids
+        endidx: 129 # defaults to None. End walking when endidx is reached. None, only applies to single index oids
         tags: #tags on tsd side
           direction: "out"
           type: "unicast"

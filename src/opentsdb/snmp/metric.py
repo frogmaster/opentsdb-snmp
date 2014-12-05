@@ -16,11 +16,14 @@ import logging
 class Metric:
     'Metric class'
     def __init__(self, device, metric=None, tags={}, oid=None, multiply=None,
-                 type=None, rate=None, ignore_zeros=False, resolver="default"):
+                 type=None, rate=None, ignore_zeros=False, resolver="default",
+                 startidx=None, endidx=None):
         self.name = metric
         self.tags = tags
         self.oid = oid
         self.ignore_zeros = ignore_zeros
+        self.startidx = startidx
+        self.endidx = endidx
         self.device = device
         self.host = device.hostname
 
@@ -36,12 +39,14 @@ class Metric:
 
         if type == "walk":
             self.walk = True
+            if resolver not in device.resolvers:
+                raise "Resolver not found"
             self.resolver = device.resolvers[resolver]
         else:
             self.walk = False
 
     def _get_walk(self, snmp):
-        data = snmp.walk(self.oid)
+        data = snmp.walk(self.oid, startidx=self.startidx, endidx=self.endidx)
         return data
 
     def _process_walk_data(self, data):
