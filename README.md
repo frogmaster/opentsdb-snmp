@@ -22,7 +22,10 @@ Commands should be something like this, i may be forgetting something
 
 # configuration
 
-Configuration is stored in YAML format and has three values: tsd, hosts_file and metrics.
+Configuration is stored in YAML format and has four values: tsd, hosts_file, metrics_dir and metrics.
+metrics from main config and from yml files in metrics_dir are merged using dict.update(), no errors 
+are thrown on duplicates, so take care.
+
 Example configuration file:
 
     hosts_file: "misc/sample_hostlist.yml"
@@ -32,6 +35,7 @@ Example configuration file:
         port: 5431 #port
       -
         host: "localhost"
+    metrics_dir: "path/to/yml/files/containing/metrics"
     metrics:
       ifHCOutUcastPkts: #unique metric name used in (device section in hostlist file)
         resolver: "ifname" #relevant only when walk is used
@@ -39,6 +43,8 @@ Example configuration file:
         metric: "interface.packets" #metric name on tsd side
         type: "walk" #either walk or get
         rate: true #wether rate should be calculated
+        multiply: 0.1 #divide value by 10
+        ignore_zeros: True #ignores zero values recieved from agent. Note, this check is before rate calculation.
         tags: #tags on tsd side
           direction: "out"
           type: "unicast"
