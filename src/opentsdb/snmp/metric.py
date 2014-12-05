@@ -34,6 +34,10 @@ class Metric:
             self.walk = False
         if "rate" in data and data["rate"]:
             self.value_modifier = device.value_modifiers["rate"]
+        if "ignore_zeros" in data:
+            self.ignore_zeros = data["ignore_zeros"]
+        else:
+            self.ignore_zeros = False
         self.device = device
 
     def _get_walk(self, snmp):
@@ -44,6 +48,8 @@ class Metric:
         buf = []
         for idx, dp in data.items():
             if dp is None:
+                next
+            if self.ignore_zeros and int(dp) == 0:
                 next
             item = self._process_dp(dp, idx)
             if (item):

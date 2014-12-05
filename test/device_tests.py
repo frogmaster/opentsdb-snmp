@@ -10,7 +10,7 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 import time
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 from mock import Mock, patch
 from opentsdb.snmp.main import Main
 from opentsdb.snmp.device import Device
@@ -44,6 +44,7 @@ class TestMetric(object):
         snmp.walk = Mock(return_value={
             "1": 10,
             "2": 20,
+            "3": 0,
         })
         snmp.get = Mock(return_value=123)
         self.time = time.time()
@@ -53,11 +54,7 @@ class TestMetric(object):
         self.mockdevice.hostname = "foo"
         self.mockdevice.snmp = snmp
         self.mockdevice.resolvers = main.resolvers
-
-    @patch('time.time')
-    def test_opentsdb_walk_metric(self, mocktime):
-        mocktime.return_value = self.time
-        mdata = {
+        self.walkmetric = {
             'metric': 'interface.packets',
             'oid': '.1.3.6.1.2.1.31.1.1.1.9',
             'type': 'walk',
@@ -68,8 +65,12 @@ class TestMetric(object):
             },
             'resolver': 'cisco_ifname'
         }
+
+    @patch('time.time')
+    def test_opentsdb_walk_metric(self, mocktime):
+        mocktime.return_value = self.time
         m = Metric(
-            data=mdata,
+            data=self.walkmetric,
             device=self.mockdevice
         )
         #test _tags_to_str with empty tags
@@ -77,6 +78,7 @@ class TestMetric(object):
         walkdata = m._get_walk(self.mockdevice.snmp)
         eq_(10, walkdata["1"])
         eq_(20, walkdata["2"])
+        eq_(0,  walkdata["3"])
         eq_(
             "put interface.packets "
             + str(int(self.time)) +
@@ -84,7 +86,7 @@ class TestMetric(object):
             m._process_dp(20, 2)
         )
         result = m._process_walk_data(walkdata)
-        eq_(2, len(result))
+        eq_(3, len(result))
         eq_(
             'put interface.packets '
             + str(int(self.time)) +
@@ -92,13 +94,25 @@ class TestMetric(object):
             result[0]
         )
         result = m.get_opentsdb_commands(self.mockdevice.snmp)
-        eq_(2, len(result))
+        eq_(3, len(result))
         eq_(
             'put interface.packets '
             + str(int(self.time)) +
             ' 1.0 host=foo index=1 direction=in type=broadcast',
             result[0]
         )
+
+    def test_opentsdb_walk_metric_with_ignore_zeros(self):
+        mdata = self.walkmetric
+        mdata["ignore_zeros"] = True
+        m = Metric(
+            data=mdata,
+            device=self.mockdevice
+        )
+        walkdata = m._get_walk(self.mockdevice.snmp)
+        result = m._process_walk_data(walkdata)
+
+        eq_(3, len(result))
 
     @patch('time.time')
     def test_opentsdb_get_metric(self, mocktime):
