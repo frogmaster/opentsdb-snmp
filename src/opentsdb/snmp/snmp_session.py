@@ -48,14 +48,15 @@ class SNMPSession:
                 ret[full_oid] = v.val
         return ret
 
-    def walk(self, oid, stripoid=True):
+    def walk(self, oid, stripoid=True, startidx=None, endidx=None):
         ret = {}
         if oid[0] != ".":
             oid = "." + oid
-        startindexpos = None
+        startindexpos = startidx
         runningtreename = oid
+        stop = False
 
-        while (runningtreename.startswith(oid)):
+        while (runningtreename.startswith(oid) and stop is False):
             vrs = VarList(Varbind(oid, startindexpos))
             result = self.session.getbulk(0, 100, vrs)
             key = None
@@ -63,6 +64,9 @@ class SNMPSession:
                 break
             """ Print output from running getbulk"""
             for i in vrs:
+                if endidx and int(i.iid) > int(endidx):
+                    stop = True
+                    break
                 if not i.tag.startswith(oid):
                     break
                 (full_oid, val) = handle_vb(i)
@@ -72,7 +76,7 @@ class SNMPSession:
                 else:
                     ret[full_oid] = val
             """ Set startindexpos for next getbulk """
-            if not vrs[-1].iid or not key:
+            if not vrs[-1].iid or not key or stop:
                 break
             startindexpos = int(key.split(".")[0])
             """ Refresh runningtreename from last result"""
