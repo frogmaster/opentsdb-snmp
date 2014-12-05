@@ -10,7 +10,7 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 import time
-from nose.tools import eq_, ok_
+from nose.tools import eq_
 from mock import Mock, patch
 from opentsdb.snmp.main import Main
 from opentsdb.snmp.device import Device
@@ -63,16 +63,15 @@ class TestMetric(object):
                 'direction': "in",
                 'type': 'broadcast'
             },
-            'resolver': 'cisco_ifname'
+            'resolver': 'default'
         }
 
     @patch('time.time')
     def test_opentsdb_walk_metric(self, mocktime):
         mocktime.return_value = self.time
-        m = Metric(
-            data=self.walkmetric,
-            device=self.mockdevice
-        )
+        metric = self.walkmetric
+        metric["device"] = self.mockdevice
+        m = Metric(**metric)
         #test _tags_to_str with empty tags
         eq_("host=foo", m._tags_to_str({}))
         walkdata = m._get_walk(self.mockdevice.snmp)
@@ -105,9 +104,9 @@ class TestMetric(object):
     def test_opentsdb_walk_metric_with_ignore_zeros(self):
         mdata = self.walkmetric
         mdata["ignore_zeros"] = True
+        mdata["device"] = self.mockdevice
         m = Metric(
-            data=mdata,
-            device=self.mockdevice
+            **mdata
         )
         walkdata = m._get_walk(self.mockdevice.snmp)
         result = m._process_walk_data(walkdata)
@@ -122,10 +121,10 @@ class TestMetric(object):
             'oid': '.1.3.6.1.4.1.9.9.109.1.1.1.1.8',
             'type': 'get',
             'tags': {},
+            'device': self.mockdevice,
         }
         m = Metric(
-            data=mdata,
-            device=self.mockdevice
+            **mdata
         )
         result = m.get_opentsdb_commands(self.mockdevice.snmp)[0]
         eq_(

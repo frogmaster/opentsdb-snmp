@@ -15,30 +15,30 @@ import logging
 
 class Metric:
     'Metric class'
-    def __init__(self, data, device):
-        self.name = data["metric"]
-        self.tags = data["tags"] or {}
-        self.oid = data["oid"]
-        self.multiply = None
-        if "multiply" in data:
-            self.multiply = float(data["multiply"])
+    def __init__(self, device, metric=None, tags={}, oid=None, multiply=None,
+                 type=None, rate=None, ignore_zeros=False, resolver="default"):
+        self.name = metric
+        self.tags = tags
+        self.oid = oid
+        self.ignore_zeros = ignore_zeros
+        self.device = device
         self.host = device.hostname
-        self.value_modifier = None
-        if data["type"] == "walk":
+
+        if multiply:
+            self.multiply = float(multiply)
+        else:
+            self.multiply = multiply
+
+        if (rate):
+            self.value_modifier = device.value_modifiers["rate"]
+        else:
+            self.value_modifier = None
+
+        if type == "walk":
             self.walk = True
-            if "resolver" in data and data["resolver"] in device.resolvers:
-                self.resolver = device.resolvers[data["resolver"]]
-            else:
-                self.resolver = device.resolvers["default"]
+            self.resolver = device.resolvers[resolver]
         else:
             self.walk = False
-        if "rate" in data and data["rate"]:
-            self.value_modifier = device.value_modifiers["rate"]
-        if "ignore_zeros" in data:
-            self.ignore_zeros = data["ignore_zeros"]
-        else:
-            self.ignore_zeros = False
-        self.device = device
 
     def _get_walk(self, snmp):
         data = snmp.walk(self.oid)

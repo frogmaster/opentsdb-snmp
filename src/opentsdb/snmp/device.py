@@ -24,7 +24,7 @@ class Device:
         for m in data["metrics"]:
             if not m in metrics:
                 continue
-            metric = Metric(metrics[m], self)
+            metric = Metric(device=self, **metrics[m])
             self.metrics.append(metric)
 
     def init_snmp(self):
