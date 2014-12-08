@@ -9,22 +9,35 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
+from opentsdb.snmp.resolvers.after_idx import AfterIndex
 
 
-class HwdslamChannel:
+class _Huawei(object):
     def __init__(self, cache=None):
         self.cache = cache
 
-    def resolve(self, index, device=None):
-        #resolve index and direction
-        #Previous code had this, guess it's neened, probably some xdsl channel
-        #stuff or something...
+    def index_to_name(self, index):
+        bstr = "{:032b}".format(int(index))
+        slot = int(bstr[15:19], 2)
+        if bstr[0:7] == "1111101":
+            port = int(bstr[19:24], 2)
+        else:
+            port = int(bstr[19:26], 2)
+        return "0/{0}/{1}".format(slot, port)
 
-        index = index + 33554431
-        after_idx_resolver = device.resolvers["after_idx"]
-        tags = after_idx_resolver.resolve(index, device=device)
-        #resolve ifname
-        ifnameresolver = device.resolvers["ifname"]
-        ifnametags = ifnameresolver.resolve(tags["index"], device=device)
-        tags.update(ifnametags)
+
+class HuaweiIfName(_Huawei):
+    def resolve(self, index, device=None):
+        tags = {
+            "index": index,
+            "interface": self.index_to_name(index)
+        }
+        return tags
+
+
+class HuaweiAfterIndex(_Huawei):
+    def resolve(self, index, device=None):
+        after_index = AfterIndex()
+        tags = after_index.resolve(index, device=device)
+        tags["interface"] = self.index_to_name(tags["index"])
         return tags
