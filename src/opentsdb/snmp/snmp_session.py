@@ -10,7 +10,7 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 from netsnmp import Session, Varbind, VarList
-
+import logging
 
 class SNMPSession:
     def __init__(self, host, community, version=2):
@@ -59,6 +59,8 @@ class SNMPSession:
         while (runningtreename.startswith(oid) and stop is False):
             vrs = VarList(Varbind(oid, startindexpos))
             result = self.session.getbulk(0, 100, vrs)
+            if self.session.ErrorStr:
+                logging.warn("walk failed on: {0} ({1})".format(self.host, self.session.ErrorStr))
             key = None
             if not result:
                 break
