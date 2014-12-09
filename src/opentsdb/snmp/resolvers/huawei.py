@@ -41,3 +41,16 @@ class HuaweiAfterIndex(_Huawei):
         tags = after_index.resolve(index, device=device)
         tags["interface"] = self.index_to_name(tags["index"])
         return tags
+
+
+class HuaweiOnt(_Huawei):
+    def resolve(self, index, device=None):
+        (idx, ont, ontport) = index.split(".")
+        gemport = self.index_to_name(idx)
+        tags = {
+            "interface": gemport,
+            "index": index,
+            "ont": ont,
+            "ontport": ontport
+        }
+        return tags
