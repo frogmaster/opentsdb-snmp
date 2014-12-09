@@ -17,15 +17,18 @@ class Metric:
     'Metric class'
     def __init__(self, device, metric=None, tags={}, oid=None, multiply=None,
                  type=None, rate=None, ignore_zeros=False, resolver="default",
-                 startidx=None, endidx=None):
+                 startidx=None, endidx=None, max_val=None, min_val=None,
+                 replacement_val=None):
         self.name = metric
         self.tags = tags
         self.oid = oid
-        self.ignore_zeros = ignore_zeros
         self.startidx = startidx
         self.endidx = endidx
         self.device = device
         self.host = device.hostname
+        self.max_val = max_val
+        self.min_val = min_val
+        self.replacement_val = replacement_val
 
         if multiply:
             self.multiply = float(multiply)
@@ -54,14 +57,18 @@ class Metric:
         for idx, dp in data.items():
             if dp is None:
                 next
-            if self.ignore_zeros and int(dp) == 0:
-                next
             item = self._process_dp(dp, idx)
             if (item):
                 buf.append(item)
         return buf
 
     def _process_dp(self, dp, key=None):
+        if dp is None:
+            return
+        if self.max_val is not None and int(dp) > int(self.max_val):
+            dp = self.replacement_val
+        elif self.min_val is not None and int(dp) < int(self.min_val):
+            dp = self.replacement_val
         if dp is None:
             return
         tags = self.tags

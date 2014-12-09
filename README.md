@@ -44,7 +44,9 @@ Example configuration file:
         type: "walk" #either walk or get
         rate: True # default to False wether rate should be calculated
         multiply: 0.1 #default to None divide value by 10
-        ignore_zeros: True # defaults False ignores zero values recieved from agent. Note, this check is before rate calculation.
+        min_val: minimum allowed value.
+        max_val: maximum allowed value.
+        replacement_val: value to replace out of range value from snmp. default None (metric is not sent to tsdb)
         startidx: 123 # defaults to None. Start walking starting from this index. Note, only applies to single index oids
         endidx: 129 # defaults to None. End walking when endidx is reached. None, only applies to single index oids
         tags: #tags on tsd side
