@@ -100,9 +100,9 @@ class Metric:
         return data
 
     def get_opentsdb_commands(self, snmp):
-        logging.debug("getting metric %s from %s", self.name, self.host)
         if self.walk:
             raw = self._get_walk(snmp)
+            logging.debug("got metric %s from %s, variable count %s", self.name, self.host, len(raw.keys()))
             return self._process_walk_data(raw)
         else:
             raw = self._get_get(snmp)

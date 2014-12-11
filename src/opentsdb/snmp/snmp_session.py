@@ -25,8 +25,8 @@ class SNMPSession:
             Community=self.community,
             Version=self.version,
             UseNumeric=1,
-            Timeout=2000000,
-            Retries=0,
+            Timeout=8000000,
+            Retries=3,
         )
 
     def walk_v1(self, oid, stripoid=True):
@@ -59,7 +59,7 @@ class SNMPSession:
         while (runningtreename.startswith(oid) and stop is False):
             vrs = VarList(Varbind(oid, startindexpos))
             result = self.session.getbulk(0, 100, vrs)
-            if self.session.ErrorStr:
+            if self.session.ErrorInd:
                 logging.warn("walk failed on: {0} ({1})".format(self.host, self.session.ErrorStr))
             key = None
             if not result:
