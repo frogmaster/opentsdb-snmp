@@ -12,12 +12,15 @@
 from netsnmp import Session, Varbind, VarList
 import logging
 
+
 class SNMPSession:
-    def __init__(self, host, community, version=2):
+    def __init__(self, host, community, version=2, timeout=2000000, retries=0):
         self.session = None
         self.host = host
         self.community = community
         self.version = version
+        self.timeout = timeout
+        self.retries = retries
 
     def connect(self):
         self.session = Session(
@@ -25,8 +28,8 @@ class SNMPSession:
             Community=self.community,
             Version=self.version,
             UseNumeric=1,
-            Timeout=8000000,
-            Retries=3,
+            Timeout=self.timeout,
+            Retries=self.retries,
         )
 
     def walk_v1(self, oid, stripoid=True):

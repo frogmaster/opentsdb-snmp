@@ -101,9 +101,25 @@ class TestMetric(object):
             result[0]
         )
 
-    def test_opentsdb_walk_metric_with_ignore_zeros(self):
+    def test_opentsdb_walk_metric_with_ranges(self):
         mdata = self.walkmetric
-        mdata["ignore_zeros"] = True
+        mdata["min_val"] = 10
+        mdata["max_val"] = 19
+        mdata["device"] = self.mockdevice
+        m = Metric(
+            **mdata
+        )
+        walkdata = m._get_walk(self.mockdevice.snmp)
+        result = m._process_walk_data(walkdata)
+
+        eq_(1, len(result))
+
+
+    def test_opentsdb_walk_metric_with_replacement(self):
+        mdata = self.walkmetric
+        mdata["min_val"] = 10
+        mdata["max_val"] = 19
+        mdata["replacement_val"] = 0
         mdata["device"] = self.mockdevice
         m = Metric(
             **mdata

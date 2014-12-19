@@ -18,6 +18,14 @@ class Device:
         self.hostname = data["hostname"]
         self.community = data["community"]
         self.snmp_version = data["snmp_version"]
+        if "snmp_timeout" in data:
+            self.snmp_timeout = data["snmp_timeout"]
+        else:
+            self.snmp_timeout = 2000000
+        if "snmp_retries" in data:
+            self.snmp_retries = data["snmp_retries"]
+        else:
+            self.snmp_retries = 0
         self.metrics = []
         self.resolvers = resolvers
         self.value_modifiers = mods
@@ -31,7 +39,9 @@ class Device:
         self.snmp = SNMPSession(
             host=self.hostname,
             community=self.community,
-            version=self.snmp_version
+            version=self.snmp_version,
+            timeout=self.snmp_timeout,
+            retries=self.snmp_retries
         )
         self.snmp.connect()
         return self.snmp
