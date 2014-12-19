@@ -27,6 +27,7 @@ class TestConfigReader(object):
     def test_devicelist(self):
         devices = self.hlr.devicelist()
         eq_("foobar", devices[0]["hostname"])
+        eq_(3, devices[0]["snmp_retries"])
 
     def test_tsd_list(self):
         tsd_list = self.hlr.tsd_list()

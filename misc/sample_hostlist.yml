@@ -2,5 +2,7 @@
   hostname: "foobar"
   community: "public"
   snmp_version: 2
+  snmp_retries: 3
+  snmp_timeout: 2000000
   metrics: 
     - "ifInUcastPkts"
