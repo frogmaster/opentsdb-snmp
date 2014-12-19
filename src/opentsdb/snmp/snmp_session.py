@@ -48,7 +48,7 @@ class SNMPSession:
                 ret[full_oid] = v.val
         return ret
 
-    def walk(self, oid, stripoid=True, startidx=None, endidx=None):
+    def walk(self, oid, stripoid=True, startidx=None, endidx=None, expect_str=False):
         ret = {}
         if oid[0] != ".":
             oid = "." + oid
@@ -71,7 +71,7 @@ class SNMPSession:
                     break
                 if not i.tag.startswith(oid):
                     break
-                (full_oid, val) = handle_vb(i)
+                (full_oid, val) = handle_vb(i, expect_str)
                 key = full_oid.replace(oid + ".", "")
                 if stripoid:
                     ret[key] = val
@@ -90,12 +90,12 @@ class SNMPSession:
         return self.session.get(oid)[0]
 
 
-def handle_vb(vb):
+def handle_vb(vb, expect_str):
     if vb.iid or vb.iid == 0:
         full_oid = vb.tag + "." + vb.iid
     else:
         full_oid = vb.tag
-    if vb.type == "OCTETSTR":
+    if vb.type == "OCTETSTR" and not expect_str:
         return (full_oid, int(vb.val.encode("hex"), 16))
     else:
         return (full_oid,  vb.val)

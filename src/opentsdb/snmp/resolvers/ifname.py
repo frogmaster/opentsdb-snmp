@@ -17,7 +17,7 @@ class IfName:
         self.cache = cache
 
     def get_ifnames(self, snmp):
-        data = snmp.walk('.1.3.6.1.2.1.31.1.1.1.1')
+        data = snmp.walk('.1.3.6.1.2.1.31.1.1.1.1', expect_str=True)
         if not data:
             raise Exception("SNMP walk failed")
         return data
