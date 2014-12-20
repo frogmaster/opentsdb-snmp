@@ -45,12 +45,17 @@ class HuaweiAfterIndex(_Huawei):
 
 class HuaweiOnt(_Huawei):
     def resolve(self, index, device=None):
-        (idx, ont, ontport) = index.split(".")
+        #there may be 3 keys or 2 keys, ifindex is first, ont second
+        #ontport may or may not be
+        keys = index.split(".")
+        idx = keys[0]
+        ont = keys[1]
         gemport = self.index_to_name(idx)
         tags = {
             "interface": gemport,
             "index": index,
             "ont": ont,
-            "ontport": ontport
         }
+        if len(keys) >= 3:
+            tags["ontport"] = keys[2]
         return tags

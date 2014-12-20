@@ -41,10 +41,17 @@ class TestHuawei(object):
         eq_(tags["direction"], "out")
         eq_(tags["interface"], "0/5/63")
 
-    def test_huawei_ont(self):
+    def test_huawei_ont_port(self):
         r = hw.HuaweiOnt()
         tags = r.resolve("4160794560.14.0")
         eq_(tags["index"], "4160794560.14.0")
         eq_(tags["interface"], "0/5/63")
         eq_(tags["ont"], "14")
         eq_(tags["ontport"], "0")
+
+    def test_huawei_ont(self):
+        r = hw.HuaweiOnt()
+        tags = r.resolve("4160794560.14")
+        eq_(tags["index"], "4160794560.14")
+        eq_(tags["interface"], "0/5/63")
+        eq_(tags["ont"], "14")
