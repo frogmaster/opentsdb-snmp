@@ -99,7 +99,7 @@ class Metric:
         if self.multiply:
             dp = float(dp) * self.multiply
         buf = "put {0} {1} {2} {3}".format(
-            self.name, int(ts), dp, tagstr, self.host
+            self.name, int(poll_time), dp, tagstr, self.host
         )
         return buf
 
@@ -116,7 +116,8 @@ class Metric:
     def get_opentsdb_commands(self, snmp, poll_time):
         if self.walk:
             raw = self._get_walk(snmp)
-            logging.debug("got metric %s from %s, variable count %s", self.name, self.host, len(raw.keys()))
+            logging.debug("got metric %s from %s, variable count %s",
+                          self.name, self.host, len(raw.keys()))
             return self._process_walk_data(raw, poll_time)
         else:
             raw = self._get_get(snmp)
