@@ -11,6 +11,7 @@
 # see <http://www.gnu.org/licenses/>.
 from opentsdb.snmp.metric import Metric
 from opentsdb.snmp.snmp_session import SNMPSession
+import time
 
 
 class Device:
@@ -54,7 +55,8 @@ class Device:
         if not self.snmp.session:
             return []
         data = []
+        poll_time = time.time()
         for m in self.metrics:
-            data.extend(m.get_opentsdb_commands(self.snmp))
+            data.extend(m.get_opentsdb_commands(self.snmp, poll_time))
         self.close_snmp()
         return data

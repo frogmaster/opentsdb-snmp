@@ -82,9 +82,9 @@ class TestMetric(object):
             "put interface.packets "
             + str(int(self.time)) +
             " 2.0 host=foo index=2 direction=in type=broadcast",
-            m._process_dp(20, 2)
+            m._process_dp(20, self.time, key=2)
         )
-        result = m._process_walk_data(walkdata)
+        result = m._process_walk_data(walkdata, self.time)
         eq_(3, len(result))
         eq_(
             'put interface.packets '
@@ -92,7 +92,7 @@ class TestMetric(object):
             ' 1.0 host=foo index=1 direction=in type=broadcast',
             result[0]
         )
-        result = m.get_opentsdb_commands(self.mockdevice.snmp)
+        result = m.get_opentsdb_commands(self.mockdevice.snmp, self.time)
         eq_(3, len(result))
         eq_(
             'put interface.packets '
@@ -110,7 +110,7 @@ class TestMetric(object):
             **mdata
         )
         walkdata = m._get_walk(self.mockdevice.snmp)
-        result = m._process_walk_data(walkdata)
+        result = m._process_walk_data(walkdata, self.time)
         eq_(1, len(result))
 
     def test_opentsdb_walk_metric_with_replacement(self):
@@ -123,7 +123,7 @@ class TestMetric(object):
             **mdata
         )
         walkdata = m._get_walk(self.mockdevice.snmp)
-        result = m._process_walk_data(walkdata)
+        result = m._process_walk_data(walkdata, self.time)
 
         eq_(3, len(result))
 
@@ -140,7 +140,7 @@ class TestMetric(object):
         m = Metric(
             **mdata
         )
-        result = m.get_opentsdb_commands(self.mockdevice.snmp)[0]
+        result = m.get_opentsdb_commands(self.mockdevice.snmp, self.time)[0]
         eq_(
             "put cpmCPUTotal5minRev "
             + str(int(self.time)) +

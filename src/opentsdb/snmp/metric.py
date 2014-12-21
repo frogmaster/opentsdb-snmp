@@ -59,17 +59,17 @@ class Metric:
             data = snmp.walk(self.oid)
         return data
 
-    def _process_walk_data(self, data):
+    def _process_walk_data(self, data, poll_time):
         buf = []
         for idx, dp in data.items():
             if dp is None:
                 next
-            item = self._process_dp(dp, idx)
+            item = self._process_dp(dp, poll_time, key=idx)
             if (item):
                 buf.append(item)
         return buf
 
-    def _process_dp(self, dp, key=None):
+    def _process_dp(self, dp, poll_time, key=None):
         if dp is None:
             return
         if self.max_val is not None and int(dp) > int(self.max_val):
@@ -113,11 +113,11 @@ class Metric:
         data = snmp.get(self.oid)
         return data
 
-    def get_opentsdb_commands(self, snmp):
+    def get_opentsdb_commands(self, snmp, poll_time):
         if self.walk:
             raw = self._get_walk(snmp)
             logging.debug("got metric %s from %s, variable count %s", self.name, self.host, len(raw.keys()))
-            return self._process_walk_data(raw)
+            return self._process_walk_data(raw, poll_time)
         else:
             raw = self._get_get(snmp)
-            return [self._process_dp(raw)]
+            return [self._process_dp(raw, poll_time)]
