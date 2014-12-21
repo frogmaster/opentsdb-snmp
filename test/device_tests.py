@@ -41,7 +41,7 @@ class TestDevice(object):
 class TestMetric(object):
     def setup(self):
         snmp = Mock()
-        snmp.walk = Mock(return_value={
+        snmp.bulkwalk = Mock(return_value={
             "1": 10,
             "2": 20,
             "3": 0,
@@ -57,7 +57,7 @@ class TestMetric(object):
         self.walkmetric = {
             'metric': 'interface.packets',
             'oid': '.1.3.6.1.2.1.31.1.1.1.9',
-            'type': 'walk',
+            'type': 'bulkwalk',
             'multiply': '0.1',
             'tags': {
                 'direction': "in",
@@ -111,9 +111,7 @@ class TestMetric(object):
         )
         walkdata = m._get_walk(self.mockdevice.snmp)
         result = m._process_walk_data(walkdata)
-
         eq_(1, len(result))
-
 
     def test_opentsdb_walk_metric_with_replacement(self):
         mdata = self.walkmetric

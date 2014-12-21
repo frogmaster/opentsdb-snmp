@@ -32,7 +32,7 @@ class SNMPSession:
             Retries=self.retries,
         )
 
-    def walk_v1(self, oid, stripoid=True):
+    def walk(self, oid, stripoid=True, expect_str=False):
         vb = Varbind(oid)
         vl = VarList(vb)
         self.session.walk(vl)
@@ -41,17 +41,15 @@ class SNMPSession:
             if v.tag is None:
                 continue
             full_oid = v.tag
-            if v.iid or v.iid == 0:
-                full_oid = v.tag + "." + v.iid
+            (full_oid, val) = handle_vb(v, expect_str)
             if stripoid:
                 full_oid = full_oid.replace(oid + ".", '')
-            if v.type == "OCTETSTR":
-                ret[full_oid] = int(v.val.encode("hex"), 16)
-            else:
-                ret[full_oid] = v.val
+            ret[full_oid] = v.val
         return ret
 
-    def walk(self, oid, stripoid=True, startidx=None, endidx=None, expect_str=False):
+    def bulkwalk(self, oid,
+                 stripoid=True, startidx=None,
+                 endidx=None, expect_str=False):
         ret = {}
         if oid[0] != ".":
             oid = "." + oid
@@ -63,7 +61,11 @@ class SNMPSession:
             vrs = VarList(Varbind(oid, startindexpos))
             result = self.session.getbulk(0, 100, vrs)
             if self.session.ErrorInd:
-                logging.warn("walk failed on: {0} ({1})".format(self.host, self.session.ErrorStr))
+                logging.warn(
+                    "walk failed on: {0} ({1})".format(
+                        self.host, self.session.ErrorStr
+                    )
+                )
             key = None
             if not result:
                 break

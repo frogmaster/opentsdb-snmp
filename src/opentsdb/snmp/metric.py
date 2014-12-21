@@ -40,8 +40,8 @@ class Metric:
         else:
             self.value_modifier = None
 
-        if type == "walk":
-            self.walk = True
+        if type == "walk" or type == "bulkwalk":
+            self.walk = type
             if resolver not in device.resolvers:
                 raise "Resolver not found"
             self.resolver = device.resolvers[resolver]
@@ -49,7 +49,14 @@ class Metric:
             self.walk = False
 
     def _get_walk(self, snmp):
-        data = snmp.walk(self.oid, startidx=self.startidx, endidx=self.endidx)
+        if self.walk == "bulkwalk":
+            data = snmp.bulkwalk(
+                self.oid,
+                startidx=self.startidx,
+                endidx=self.endidx
+            )
+        else:
+            data = snmp.walk(self.oid)
         return data
 
     def _process_walk_data(self, data):
