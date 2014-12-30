@@ -55,7 +55,7 @@ class TestMetric(object):
         self.mockdevice.snmp = snmp
         self.mockdevice.resolvers = main.resolvers
         self.walkmetric = {
-            'metric': 'interface.packets',
+            'metric': 'interface.packets.{direction}.{host}',
             'oid': '.1.3.6.1.2.1.31.1.1.1.9',
             'type': 'bulkwalk',
             'multiply': '0.1',
@@ -73,31 +73,31 @@ class TestMetric(object):
         metric["device"] = self.mockdevice
         m = Metric(**metric)
         #test _tags_to_str with empty tags
-        eq_("host=foo", m._tags_to_str({}))
+        eq_("", m._tags_to_str({}))
         walkdata = m._get_walk(self.mockdevice.snmp)
         eq_(10, walkdata["1"])
         eq_(20, walkdata["2"])
         eq_(0,  walkdata["3"])
         eq_(
-            "put interface.packets "
+            "put interface.packets.in.foo "
             + str(int(self.time)) +
-            " 2.0 host=foo index=2 direction=in type=broadcast",
+            " 2.0 index=2 type=broadcast",
             m._process_dp(20, self.time, key=2)
         )
         result = m._process_walk_data(walkdata, self.time)
         eq_(3, len(result))
         eq_(
-            'put interface.packets '
+            'put interface.packets.in.foo '
             + str(int(self.time)) +
-            ' 1.0 host=foo index=1 direction=in type=broadcast',
+            ' 1.0 index=1 type=broadcast',
             result[0]
         )
         result = m.get_opentsdb_commands(self.mockdevice.snmp, self.time)
         eq_(3, len(result))
         eq_(
-            'put interface.packets '
+            'put interface.packets.in.foo '
             + str(int(self.time)) +
-            ' 1.0 host=foo index=1 direction=in type=broadcast',
+            ' 1.0 index=1 type=broadcast',
             result[0]
         )
 

@@ -11,6 +11,7 @@
 # see <http://www.gnu.org/licenses/>.
 import time
 import logging
+from string import Formatter
 
 
 class Metric:
@@ -29,6 +30,8 @@ class Metric:
         self.max_val = max_val
         self.min_val = min_val
         self.replacement_val = replacement_val
+
+        self.tags["host"] = self.host
 
         if multiply:
             self.multiply = float(multiply)
@@ -78,14 +81,12 @@ class Metric:
             dp = self.replacement_val
         if dp is None:
             return
-        tags = self.tags
+        tags = self.tags.copy()
         if (key):
             resolved = self.resolver.resolve(key, device=self.device)
             if resolved:
-                tags = dict(
-                    tags.items()
-                    + resolved.items()
-                )
+                tags.update(resolved)
+        (metric, tags) = self._tags_to_metric(tags)
         tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
@@ -99,15 +100,36 @@ class Metric:
         if self.multiply:
             dp = float(dp) * self.multiply
         buf = "put {0} {1} {2} {3}".format(
-            self.name, int(poll_time), dp, tagstr, self.host
+            metric, int(poll_time), dp, tagstr
         )
         return buf
 
+    def _tags_to_metric(self, tags):
+        """
+        formats metric name and removes used items from tags
+        retruns tuple (new_metric_name, tags)
+        """
+        f = Formatter()
+        #get keys from metric name
+        parsed = f.parse(self.name)
+        keymap = dict()
+        for tup in parsed:
+            if (tup[1]):
+                keymap[tup[1]] = True
+        if not keymap:
+            return (self.name, tags)
+        #create new metric string
+        metric = f.format(self.name, **tags)
+        #remove used tags
+        for i in keymap.keys():
+            del tags[i]
+        return (metric, tags)
+
     def _tags_to_str(self, tagsdict):
-        buf = "host=" + self.host
+        buff_arr = []
         for key, val in tagsdict.items():
-            buf += " " + str(key) + "=" + str(val)
-        return buf
+            buff_arr.append(str(key) + "=" + str(val))
+        return " ".join(buff_arr)
 
     def _get_get(self, snmp):
         data = snmp.get(self.oid)
