@@ -12,6 +12,7 @@
 import time
 import logging
 from string import Formatter
+import copy
 
 
 class Metric:
@@ -21,7 +22,7 @@ class Metric:
                  startidx=None, endidx=None, max_val=None, min_val=None,
                  replacement_val=None):
         self.name = metric
-        self.tags = tags
+        self.tags = copy.deepcopy(tags)
         self.oid = oid
         self.startidx = startidx
         self.endidx = endidx

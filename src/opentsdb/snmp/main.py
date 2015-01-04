@@ -101,9 +101,10 @@ class Main:
 
     def load_devices(self):
         self.devices = []
+        metrics = self.conf.metrics()
         for d in self.conf.devicelist():
             d = Device(d, self.resolvers,
-                       self.value_modifiers, self.conf.metrics())
+                       self.value_modifiers, metrics)
             self.devices.append(d)
         return self.devices
 
