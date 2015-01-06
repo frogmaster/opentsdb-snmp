@@ -124,14 +124,18 @@ class Main:
                 )
                 pool.close()
                 pool.join()
+                logging.info("Polling done in %d seconds",
+                             time.time() - start_time)
                 #wait until sending is done
                 while not self.senderq.empy():
                     time.sleep(10)
                 delta = time.time() - start_time
+                logging.info("Iteration took %d seconds", delta)
                 if delta < self.interval:
                     time.sleep(self.interval - delta)
                 if (times > 0):
                     times -= 1
+
         except (KeyboardInterrupt, SystemExit):
             self.stop_senders()
             pool.terminate()
