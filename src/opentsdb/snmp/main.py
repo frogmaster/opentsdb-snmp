@@ -124,6 +124,9 @@ class Main:
                 )
                 pool.close()
                 pool.join()
+                #wait until sending is done
+                while not self.senderq.empy():
+                    time.sleep(10)
                 delta = time.time() - start_time
                 if delta < self.interval:
                     time.sleep(self.interval - delta)
@@ -131,6 +134,7 @@ class Main:
                     times -= 1
         except (KeyboardInterrupt, SystemExit):
             self.stop_senders()
+            pool.terminate()
         self.stop_senders()
 
 
