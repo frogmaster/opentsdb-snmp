@@ -43,6 +43,10 @@ parser.add_argument(
     "-l", "--loglevel", dest="loglevel", default="info",
     help="Number of times to loop"
 )
+parser.add_argument(
+    "-f", "--hostlist", dest="loglevel", default="info",
+    help="Hostlist file (overrides one defined in configfile)"
+)
 
 
 def run():
@@ -58,20 +62,21 @@ def run():
     app = Main(
         readers=int(args.readers),
         conf=args.conffile,
-        interval=int(args.interval)
+        interval=int(args.interval),
+        hostlist=args.hostlist,
     )
     app.run(times=int(args.times))
 
 
 class Main:
-    def __init__(self, readers=5, conf=None, interval=300):
+    def __init__(self, readers=5, conf=None, interval=300, hostlist=None):
         manager = multiprocessing.Manager()
         self.senderq = manager.Queue()
         self.cache = manager.dict()
         self.readers = readers
         self.interval = interval
         if conf:
-            self.conf = ConfigReader(conf)
+            self.conf = ConfigReader(conf, hostlist)
         self.resolvers = self.load_resolvers()
         self.value_modifiers = self.load_value_modifiers()
 
@@ -127,7 +132,7 @@ class Main:
                 logging.info("Polling done in %d seconds",
                              time.time() - start_time)
                 #wait until sending is done
-                while not self.senderq.empy():
+                while not self.senderq.empty():
                     time.sleep(10)
                 delta = time.time() - start_time
                 logging.info("Iteration took %d seconds", delta)
@@ -143,10 +148,13 @@ class Main:
 
 
 class ConfigReader:
-    def __init__(self, path):
+    def __init__(self, path, hostlist=None):
         self.path = path
         self.data = self.load_file(path)
-        self.hostlist = self.load_file(self.data["hosts_file"])
+        if hostlist:
+            self.hostlist = self.load_file(self.hostlist)
+        else:
+            self.hostlist = self.load_file(self.data["hosts_file"])
 
     def load_file(self, path):
         with open(path) as fp:
