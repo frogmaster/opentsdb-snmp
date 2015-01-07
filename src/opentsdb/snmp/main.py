@@ -76,7 +76,7 @@ class Main:
         self.readers = readers
         self.interval = interval
         if conf:
-            self.conf = ConfigReader(conf, hostlist)
+            self.conf = ConfigReader(conf, hostlist=hostlist)
         self.resolvers = self.load_resolvers()
         self.value_modifiers = self.load_value_modifiers()
 
@@ -152,7 +152,7 @@ class ConfigReader:
         self.path = path
         self.data = self.load_file(path)
         if hostlist:
-            self.hostlist = self.load_file(self.hostlist)
+            self.hostlist = self.load_file(hostlist)
         else:
             self.hostlist = self.load_file(self.data["hosts_file"])
 
