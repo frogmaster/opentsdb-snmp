@@ -44,7 +44,7 @@ parser.add_argument(
     help="Number of times to loop"
 )
 parser.add_argument(
-    "-f", "--hostlist", dest="hostlist", default="info",
+    "-f", "--hostlist", dest="hostlist", default=False,
     help="Hostlist file (overrides one defined in configfile)"
 )
 
