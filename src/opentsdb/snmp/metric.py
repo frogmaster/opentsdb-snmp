@@ -92,7 +92,7 @@ class Metric:
         ts = time.time()
         if self.value_modifier:
             dp = self.value_modifier.modify(
-                key=self.name + tagstr,
+                key=metric + tagstr,
                 ts=ts,
                 value=dp
             )
