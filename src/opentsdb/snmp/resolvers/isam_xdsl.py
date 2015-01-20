@@ -160,6 +160,8 @@ class IsamOldOctets(Dot1dBasePortIfIndex):
     def resolve(self, index, device=None):
         tags = _SplitIndexVlan().resolve(index, device=device)
         new_tags = super(IsamOldOctets, self).resolve(tags["index"], device)
+        if not new_tags:
+            return None
         tags.update(new_tags)
         interface_tags = IsamOld().resolve(tags["index"], device)
         tags.update(interface_tags)
