@@ -76,12 +76,6 @@ class Metric:
     def _process_dp(self, dp, poll_time, key=None):
         if dp is None:
             return
-        if self.max_val is not None and int(dp) > int(self.max_val):
-            dp = self.replacement_val
-        elif self.min_val is not None and int(dp) < int(self.min_val):
-            dp = self.replacement_val
-        if dp is None:
-            return
         tags = self.tags.copy()
         if (key):
             resolved = self.resolver.resolve(key, device=self.device)
@@ -96,6 +90,10 @@ class Metric:
                 ts=ts,
                 value=dp
             )
+        if self.max_val is not None and int(dp) > int(self.max_val):
+            dp = self.replacement_val
+        elif self.min_val is not None and int(dp) < int(self.min_val):
+            dp = self.replacement_val
         if dp is None:
             return None
         if self.multiply:
