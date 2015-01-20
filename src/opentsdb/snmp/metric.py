@@ -60,7 +60,7 @@ class Metric:
                 endidx=self.endidx
             )
         else:
-            data = snmp.walk(self.oid)
+            data = snmp.walk(self.oid, expect_str=False)
         return data
 
     def _process_walk_data(self, data, poll_time):
@@ -87,6 +87,8 @@ class Metric:
             resolved = self.resolver.resolve(key, device=self.device)
             if resolved:
                 tags.update(resolved)
+            else:
+                return None
         (metric, tags) = self._tags_to_metric(tags)
         tagstr = self._tags_to_str(tags)
         ts = time.time()
