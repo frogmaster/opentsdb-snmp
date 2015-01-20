@@ -44,7 +44,7 @@ class SNMPSession:
             (full_oid, val) = handle_vb(v, expect_str)
             if stripoid:
                 full_oid = full_oid.replace(oid + ".", '')
-            ret[full_oid] = v.val
+            ret[full_oid] = val
         return ret
 
     def bulkwalk(self, oid,
