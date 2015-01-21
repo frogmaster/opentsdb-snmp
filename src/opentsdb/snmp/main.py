@@ -123,10 +123,10 @@ class Main:
                 start_time = time.time()
                 pool = multiprocessing.Pool(self.readers)
                 """fill reader queue"""
-                pool.map(
+                pool.map_async(
                     r_worker,
                     [(dev, self.senderq) for dev in self.devices]
-                )
+                ).get(9999999)
                 pool.close()
                 pool.join()
                 logging.info("Polling done in %d seconds",
