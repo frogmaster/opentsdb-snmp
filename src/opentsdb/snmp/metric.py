@@ -92,12 +92,13 @@ class Metric:
                 ts=ts,
                 value=dp
             )
-        if self.max_val is not None and int(dp) > int(self.max_val):
+        if dp is None: return None
+
+        if self.max_val is not None and long(dp) > long(self.max_val):
             dp = self.replacement_val
-        elif self.min_val is not None and int(dp) < int(self.min_val):
+        elif self.min_val is not None and long(dp) < long(self.min_val):
             dp = self.replacement_val
-        if dp is None:
-            return None
+        if dp is None: return None
         if self.multiply:
             dp = float(dp) * self.multiply
         buf = "put {0} {1} {2} {3}".format(
