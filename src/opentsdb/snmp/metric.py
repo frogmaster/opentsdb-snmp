@@ -20,7 +20,7 @@ class Metric:
     def __init__(self, device, metric=None, tags={}, oid=None, multiply=None,
                  type=None, rate=None, ignore_zeros=False, resolver="default",
                  startidx=None, endidx=None, max_val=None, min_val=None,
-                 replacement_val=None):
+                 replacement_val=None, rate_rand_wraps=False):
         self.name = metric
         self.tags = copy.deepcopy(tags)
         self.oid = oid
@@ -31,6 +31,7 @@ class Metric:
         self.max_val = max_val
         self.min_val = min_val
         self.replacement_val = replacement_val
+        self.rate_rand_wraps = rate_rand_wraps
 
         self.tags["host"] = self.host
 
@@ -90,7 +91,8 @@ class Metric:
             dp = self.value_modifier.modify(
                 key=metric + tagstr,
                 ts=ts,
-                value=dp
+                value=dp,
+                rate_rand_wraps=self.rate_rand_wraps
             )
         if dp is None: return None
 

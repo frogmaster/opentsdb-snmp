@@ -16,7 +16,7 @@ class Rate:
     def __init__(self, cache):
         self.cache = cache
 
-    def modify(self, key=None, ts=None, value=None):
+    def modify(self, key=None, ts=None, value=None, rate_rand_wraps=False):
         key = "rate_" + key
         new = {'ts': ts, 'value': float(value)}
         if not key in self.cache:
@@ -25,7 +25,7 @@ class Rate:
             return None
         old = self.cache[key]
         try:
-            rate = self.rate(old['ts'], old['value'], new['ts'], new['value'])
+            rate = self.rate(old['ts'], old['value'], new['ts'], new['value'], rate_rand_wraps)
             self.cache[key] = new
             return rate
         except ZeroDivisionError:
@@ -33,10 +33,12 @@ class Rate:
                             old['ts'], old['value'],
                             new['ts'], new['value'], key)
 
-    def rate(self, told, vold, tnew, vnew):
+    def rate(self, told, vold, tnew, vnew, discard):
         rate = (vnew - vold) / (tnew - told)
         if rate >= 0:
             return rate
+        if discard:
+            return None
         w = 64
         if vold < 2 ** 32:
             w = 32
