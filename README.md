@@ -42,7 +42,8 @@ Example configuration file:
         oid: "1.3.6.1.2.1.31.1.1.1.11"
         metric: "interface.packets" #metric name on tsd side
         type: "walk" #either walk or get
-        rate: True # default to False wether rate should be calculated
+        rate: True # defaults to False, whether a rate should be calculated
+        rate_rand_wraps: defaults to False. If true, datapoint is discarded, when counter wrap is detected. Useful for counters with random wraps (per/day, per/week, constant reboots etc).
         multiply: 0.1 #default to None divide value by 10
         min_val: minimum allowed value.
         max_val: maximum allowed value.
