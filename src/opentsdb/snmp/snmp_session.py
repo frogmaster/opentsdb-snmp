@@ -10,6 +10,7 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 from netsnmp import Session, Varbind, VarList
+from socket import gethostbyname
 import logging
 
 
@@ -23,8 +24,14 @@ class SNMPSession:
         self.retries = retries
 
     def connect(self):
+        #resolve hostname
+        try:
+            ip = gethostbyname(self.host)
+        except:
+            self.session = None
+            return None
         self.session = Session(
-            DestHost=self.host,
+            DestHost=ip,
             Community=self.community,
             Version=self.version,
             UseNumeric=1,
