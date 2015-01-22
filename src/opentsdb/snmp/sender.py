@@ -171,7 +171,6 @@ class SenderThread(multiprocessing.Process):
             self.tsd.socket = None
 
     def _mainloop(self):
-        self.connect()
         senddata = []
         while True:
             try:
@@ -184,7 +183,9 @@ class SenderThread(multiprocessing.Process):
                 #logging.debug("Queue empty")
                 break
         if len(senddata) > 0:
+            self.connect()
             while not self.tsd.send_data(senddata):
+                self.connect()
                 time.sleep(1)
 
     def run(self):
