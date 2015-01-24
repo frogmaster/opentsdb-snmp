@@ -65,7 +65,7 @@ class SNMPSession:
         stop = False
 
         while (runningtreename.startswith(oid) and stop is False):
-            vrs = VarList(Varbind(oid, startindexpos))
+            vrs = VarList(Varbind(runningtreename, startindexpos))
             result = self.session.getbulk(0, 100, vrs)
             if self.session.ErrorInd:
                 logging.warn(
@@ -92,7 +92,7 @@ class SNMPSession:
             """ Set startindexpos for next getbulk """
             if not vrs[-1].iid or not key or stop:
                 break
-            startindexpos = int(key.split(".")[0])
+            startindexpos = vrs[-1].iid
             """ Refresh runningtreename from last result"""
             runningtreename = vrs[-1].tag
 
