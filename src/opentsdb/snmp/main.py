@@ -133,7 +133,7 @@ class Main:
                              time.time() - start_time)
                 #wait until sending is done
                 while not self.senderq.empty():
-                    time.sleep(10)
+                    time.sleep(1)
                 delta = time.time() - start_time
                 logging.info("Iteration took %d seconds", delta)
                 if delta < self.interval:
@@ -198,8 +198,7 @@ def r_worker(args):
     send_queue = args[1]
     try:
         data = device.poll()
-        for row in data:
-            send_queue.put(row)
+        send_queue.put(data)
     except Exception:
         print('Caught exception in worker thread:')
         traceback.print_exc()

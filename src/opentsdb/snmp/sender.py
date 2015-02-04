@@ -65,7 +65,7 @@ class TSDConnection:
         for family, socktype, proto, canonname, sockaddr in addresses:
             try:
                 soc = socket.socket(family, socktype, proto)
-                soc.settimeout(15)
+                soc.settimeout(60)
                 soc.connect(sockaddr)
                 return soc
             except socket.error, msg:
@@ -174,10 +174,10 @@ class SenderThread(multiprocessing.Process):
         senddata = []
         while True:
             try:
-                line = self.squeue.get(True, self.queue_timeout)
-                senddata.append(line)
+                lines = self.squeue.get(True, self.queue_timeout)
+                senddata = senddata + lines
                 self.squeue.task_done()
-                if len(senddata) > 10000:
+                if len(senddata) > 500000:
                     break
             except Exception:
                 #logging.debug("Queue empty")
