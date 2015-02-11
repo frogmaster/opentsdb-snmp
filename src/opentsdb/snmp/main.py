@@ -198,7 +198,10 @@ def r_worker(args):
     send_queue = args[1]
     try:
         data = device.poll()
-        send_queue.put(data)
+        length = len(data)
+        step = 300
+        for i in xrange(0, length, step):
+            send_queue.put(data[i:i+step])
     except Exception:
         print('Caught exception in worker thread:')
         traceback.print_exc()
