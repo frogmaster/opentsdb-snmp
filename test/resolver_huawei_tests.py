@@ -41,6 +41,13 @@ class TestHuawei(object):
         eq_(tags["direction"], "out")
         eq_(tags["interface"], "0/5/63")
 
+    def test_huawei_after_idx_usds(self):
+        r = hw.HuaweiAfterIndexUsDs()
+        tags = r.resolve("4160794560.2", device=self.device)
+        eq_(tags["index"], 4160794560)
+        eq_(tags["direction"], "us")
+        eq_(tags["interface"], "0/5/63")
+
     def test_huawei_ont_port(self):
         r = hw.HuaweiOnt()
         tags = r.resolve("4160794560.14.0")

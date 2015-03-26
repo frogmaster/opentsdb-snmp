@@ -42,6 +42,12 @@ class HuaweiAfterIndex(_Huawei):
         tags["interface"] = self.index_to_name(tags["index"])
         return tags
 
+class HuaweiAfterIndexUsDs(_Huawei):
+    def resolve(self, index, device=None):
+        after_index = AfterIndex()
+        tags = after_index.resolve(index, device=device, updown=True)
+        tags["interface"] = self.index_to_name(tags["index"])
+        return tags
 
 class HuaweiOnt(_Huawei):
     def resolve(self, index, device=None):
