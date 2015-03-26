@@ -15,14 +15,14 @@ class AfterIndex:
     def __init__(self, cache=None):
         self.cache = cache
 
-    def resolve(self, index, device=None):
+    def resolve(self, index, device=None, updown=False, reverse=False):
         tags = {}
         buf = ("%s" % index).split(".")
         tags["index"] = int(buf[0])
-        if int(buf[1]) == 2:
-            tags["direction"] = "out"
-        elif int(buf[1]) == 1:
-            tags["direction"] = "in"
+        if int(buf[1]) == 2 or (int(buf[1]) == 1 and reverse):
+            tags["direction"] = "us" if updown else "out"
+        elif int(buf[1]) == 1 or (int(buf[1]) == 2 and reverse):
+            tags["direction"] = "ds" if updown else "in"
         else:
             raise Exception("Direction after Index Resolve failed")
         return tags

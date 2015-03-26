@@ -49,6 +49,7 @@ setuptools.setup(
             "after_idx_ifname=opentsdb.snmp.resolvers.after_idx_ifname:AfterIndexIfname",
             "huawei_ifname=opentsdb.snmp.resolvers.huawei:HuaweiIfName",
             "huawei_after_idx=opentsdb.snmp.resolvers.huawei:HuaweiAfterIndex",
+            "huawei_us_ds=opentsdb.snmp.resolvers.huawei:HuaweiAfterIndexUsDs",
             "huawei_ont_port=opentsdb.snmp.resolvers.huawei:HuaweiOnt",
             "d500_xdsl=opentsdb.snmp.resolvers.d500_xdsl:D500_xdsl",
             "isam_nfxsa_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSA",
