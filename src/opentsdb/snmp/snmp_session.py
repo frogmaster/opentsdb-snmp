@@ -66,7 +66,7 @@ class SNMPSession:
 
         while (runningtreename.startswith(oid) and stop is False):
             vrs = VarList(Varbind(runningtreename, startindexpos))
-            result = self.session.getbulk(0, 100, vrs)
+            result = self.session.getbulk(0, 50, vrs)
             if self.session.ErrorInd:
                 logging.warn(
                     "walk failed on: {0} ({1})".format(
@@ -75,6 +75,7 @@ class SNMPSession:
                 )
             key = None
             if not result:
+		logging.warn("got no result: %s %s", self.host, oid)
                 break
             """ Print output from running getbulk"""
             for i in vrs:
