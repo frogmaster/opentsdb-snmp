@@ -91,12 +91,12 @@ class TestSenderThread(object):
         self.st = sender.SenderThread(
             squeue=self.q, host='localhost', port=54321, queue_timeout=0.1)
 
-    def test_mainloopt(self):
+    def test_mainloop(self):
         with patch('socket.socket') as mocksock:
             mocksock.connect = Mock()
             mocksock.return_value = mocksock
-            self.q.put("foo")
-            self.q.put("bar")
+            self.q.put(["foo", "bar"])
+#            self.q.put("bar")
             mocksock.sendall = Mock()
             self.st._mainloop()
             mocksock.sendall.assert_called_with('foo\nbar')

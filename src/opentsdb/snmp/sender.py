@@ -182,6 +182,7 @@ class SenderThread(multiprocessing.Process):
             except Exception:
                 #logging.debug("Queue empty")
                 break
+
         if len(senddata) > 0:
             self.connect()
             while not self.tsd.send_data(senddata):
