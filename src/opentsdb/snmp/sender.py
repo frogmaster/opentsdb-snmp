@@ -10,36 +10,31 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 import socket
-import multiprocessing
-import random
+from random import shuffle
+from itertools import cycle
 import time
 import logging
 
 
-class SenderManager:
-    """
-    squeue - queue containing lines for sending to tsds
-    tsd_list - list of tuples containing host port pairs
-    """
-    def __init__(self, squeue, tsd_list):
-        self.workers = []
-        for host, port in tsd_list:
-            for i in range(0, 1):
-                st = SenderThread(
-                    squeue=squeue,
-                    host=host,
-                    port=port
-                )
-                self.workers.append(st)
+class Sender(object):
+    def __init__(self, tsd_list):
+        tsd_list = list(tsd_list)
+        shuffle(tsd_list)
+        self.tsd_cycle = cycle(tsd_list)
+        self.tsd = None
 
-    def run(self):
-        logging.debug("SenderManager: starting senders")
-        for w in self.workers:
-            w.start()
+    #init tsd
+    def init_tsd(self):
+        while (not self.tsd or not self.tsd.verify()):
+            (host, port) = next(self.tsd_cycle)
+            logging.debug("Using tsd: %s:%d", host, port)
+            self.tsd = TSDConnection(host, port)
+            self.tsd.connect()
+            time.sleep(1)
 
-    def stop(self):
-        for w in self.workers:
-            w.stop()
+    def send(self, lines):
+        self.init_tsd()
+        self.tsd.send_data(lines)
 
 
 class TSDConnection:
@@ -151,57 +146,3 @@ class TSDConnection:
                 pass
             self.socket = None
         return False
-
-
-class SenderThread(multiprocessing.Process):
-    def __init__(self, squeue, host, port, queue_timeout=5):
-        super(SenderThread, self).__init__()
-        self.squeue = squeue
-        self.host = host
-        self.port = port
-        self.tsd = TSDConnection(host=host, port=port)
-        self._stop = False
-        self.daemon = True
-        self.queue_timeout = queue_timeout
-
-    def stop(self):
-        logging.debug("Stopping SenterThread %s %s", self.host, self.port)
-        self._stop = True
-        if self.tsd:
-            self.tsd.socket = None
-
-    def _mainloop(self):
-        senddata = []
-        while True:
-            try:
-                lines = self.squeue.get(True, self.queue_timeout)
-                senddata = senddata + lines
-                self.squeue.task_done()
-                if len(senddata) > 500000:
-                    break
-            except Exception:
-                #logging.debug("Queue empty")
-                break
-
-        if len(senddata) > 0:
-            self.connect()
-            while not self.tsd.send_data(senddata):
-                self.connect()
-                time.sleep(1)
-
-    def run(self):
-        logging.debug("Starting SenterThread %s %s", self.host, self.port)
-        while not self._stop:
-            self._mainloop()
-
-    def connect(self):
-        try_delay = 1
-        while not self._stop:
-            if self.tsd.verify():
-                return True
-            try_delay *= 1 + random.random()
-            if try_delay > 600:
-                try_delay *= 0.5
-                time.sleep(try_delay)
-            if self.tsd.connect():
-                return True

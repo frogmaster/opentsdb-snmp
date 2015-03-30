@@ -43,9 +43,8 @@ class TestMain(object):
             interval=2
         )
 
-    @patch('opentsdb.snmp.sender.SenderManager.run')
-    @patch('opentsdb.snmp.sender.SenderThread.connect')
-    def test_run(self, mock1, mock2):
+    @patch('opentsdb.snmp.worker.WorkerManager.start')
+    def test_run(self, mock1):
         self.mainobj.load_devices()
         # load_devices is called in run method,
         # so devices get's overwritten unless mocked
@@ -57,11 +56,6 @@ class TestMain(object):
         self.mainobj.run(True)
         delta = time.time() - cur_time
         ok_(delta >= 2, "Sleep if we took less than interval")
-        self.mainobj.sender_manager.stop()
-
-    def test_init_senders(self):
-        self.mainobj.init_senders()
-        self.mainobj.sender_manager.stop()
 
 
 class MockDevice(object):

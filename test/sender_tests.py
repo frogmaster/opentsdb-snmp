@@ -9,11 +9,10 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
-from nose.tools import ok_, eq_
+from nose.tools import ok_
 import opentsdb.snmp.sender as sender
 import time
 from mock import patch, Mock
-from Queue import Queue
 import socket
 import signal
 
@@ -72,10 +71,6 @@ class TestDSDConnection(object):
             self.tsd.socket = Mock()
             self.tsd.last_verify = time.time()
             self.tsd.connect()
-#should test connect with retries, but i currently don't see an easy way
-#        with timeout(seconds=2):
-#            with patch(self.tsd._get_connected_socket) as mockgetsoc:
-#                mockgetsoc.side_effect =
 
     def test_send_data(self):
         self.tsd.socket = Mock()
@@ -84,42 +79,18 @@ class TestDSDConnection(object):
         self.tsd.socket.sendall.assert_called_with('foo\nbar')
 
 
-class TestSenderThread(object):
-
+class TestSender(object):
     def setup(self):
-        self.q = Queue()
-        self.st = sender.SenderThread(
-            squeue=self.q, host='localhost', port=54321, queue_timeout=0.1)
+        tsd_list = [('localhost', 4242), ('localhost', 4343)]
+        self.sender = sender.Sender(tsd_list)
 
-    def test_mainloop(self):
+    def test_sender(self):
         with patch('socket.socket') as mocksock:
             mocksock.connect = Mock()
             mocksock.return_value = mocksock
-            self.q.put(["foo", "bar"])
-#            self.q.put("bar")
             mocksock.sendall = Mock()
-            self.st._mainloop()
+            self.sender.send(["foo", "bar"])
             mocksock.sendall.assert_called_with('foo\nbar')
-            ok_(self.q.empty())
-            #test if values are put back to queue, when send_data fails:
-            #mocksock.sendall.side_effect = socket.error
-            #self.q.put("foo")
-            #self.q.put("bar")
-            #self.st._mainloop()
-            #ok_(self.q.get() is "foo")
-            #ok_(self.q.get() is "bar")
-
-
-class TestSenderManager(object):
-    @patch('opentsdb.snmp.sender.SenderThread')
-    def test_sm_run(self, mocksender):
-        tsd_list = [("localhost", 54321)]
-        q = Queue()
-        self.sm = sender.SenderManager(squeue=q, tsd_list=tsd_list)
-        eq_(1, len(self.sm.workers))
-        #w = self.sm.workers[0]
-        self.sm.run()
-        self.sm.stop()
 
 
 class timeout:

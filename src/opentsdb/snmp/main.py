@@ -13,7 +13,7 @@ import time
 import multiprocessing
 from pkg_resources import iter_entry_points
 from opentsdb.snmp.device import Device
-from opentsdb.snmp.sender import SenderManager
+from opentsdb.snmp.worker import WorkerManager
 import yaml
 import argparse
 import logging
@@ -71,7 +71,7 @@ def run():
 class Main:
     def __init__(self, readers=5, conf=None, interval=300, hostlist=None):
         manager = multiprocessing.Manager()
-        self.senderq = manager.Queue()
+        self.dev_queue = manager.Queue()
         self.cache = manager.dict()
         self.readers = readers
         self.interval = interval
@@ -79,18 +79,6 @@ class Main:
             self.conf = ConfigReader(conf, hostlist=hostlist)
         self.resolvers = self.load_resolvers()
         self.value_modifiers = self.load_value_modifiers()
-
-    def init_senders(self):
-        self.sender_manager = SenderManager(
-            squeue=self.senderq,
-            tsd_list=self.conf.tsd_list()
-        )
-        self.sender_manager.run()
-
-    def stop_senders(self):
-        while not self.senderq.empty():
-            time.sleep(10)
-        self.sender_manager.stop()
 
     def load_resolvers(self):
         resolvers = {}
@@ -114,26 +102,26 @@ class Main:
         return self.devices
 
     def run(self, times=-1):
-        self.load_devices()
-        self.init_senders()
+        wm = WorkerManager(
+            self.dev_queue,
+            self.resolvers,
+            self.value_modifiers,
+            self.cache,
+            self.conf.metrics(),
+            self.conf.tsd_list(),
+            workers=self.readers
+        )
         try:
             while(True):
+                dev_list = self.conf.devicelist()
+                for d in dev_list:
+                    self.dev_queue.put(d)
                 if (times == 0):
                     break
                 start_time = time.time()
-                pool = multiprocessing.Pool(self.readers)
-                """fill reader queue"""
-                pool.map_async(
-                    r_worker,
-                    [(dev, self.senderq) for dev in self.devices]
-                ).get(9999999)
-                pool.close()
-                pool.join()
-                logging.info("Polling done in %d seconds",
-                             time.time() - start_time)
-                #wait until sending is done
-                while not self.senderq.empty():
-                    time.sleep(1)
+                #start workers
+                wm.start()
+                wm.join()
                 delta = time.time() - start_time
                 logging.info("Iteration took %d seconds", delta)
                 if delta < self.interval:
@@ -142,10 +130,7 @@ class Main:
                     times -= 1
 
         except (KeyboardInterrupt, SystemExit):
-            self.stop_senders()
-            pool.terminate()
-        self.stop_senders()
-
+            wm.terminate()
 
 class ConfigReader:
     def __init__(self, path, hostlist=None):
