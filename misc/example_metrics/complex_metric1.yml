@@ -1,0 +1,50 @@
+#metric name, this is referenced from host entry
+complex_metric:
+
+#lets imagine resolver foo produces tags direction and interface
+  resolver: "foo"
+
+#type walk(getnext), bulkwalk or get. If the device
+#is not particularily moody, use bulkwalk
+  type: "bulkwalk"
+
+#oid to walk, lets imagine that this particular one has
+#many indexes, of whick one is ifindex and other is direction
+  oid: ".1.3.6.1.4.1.2011.6.115.1.2.1.1.3"
+
+#use startidx and endidx if you want only a particular
+#index range (bulkwalk only!).
+#for example:
+  #staridx: 123
+  #endidx: 1000
+#only returns oids, with indexes between 123 and 1000
+#Beware! This only works, when there's only one index,
+#so it wouldn't work in this case. Also, i currently
+#consider this quite experimental, so experiment before
+#using in production.
+
+#metric name in tsdb. when something is curly braced,
+#it gets replaced by the value provided in tags.
+#That particular tag removed. There's always an host tag,
+#resolver adds direction tag. So for example if the values
+#were host=foo-bar1.nowhere.net and direction=in, then the
+#resulting metric would be imaginary.flow.in.foo-bar1.nowhere.net
+  metric: "imaginary.flow.{direction}.{host}"
+
+#ignore_zeros, for example, if you don't want to collect
+#non-fuctional interface counters, which are always zeros,
+#enable this.
+#Default is false
+  ignore_zeros: false
+
+#max_ and min_val, set these to discard values exceeding max
+#or being less than min. If you don't want to discard these,
+#then you can set a replacement_val
+#default is unset
+  max_val: 10
+  min_val: 2
+  replacement_val: 0
+
+#Specify whatever additional tags you want
+  tags:
+    im_a: "tag"
