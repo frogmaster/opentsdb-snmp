@@ -48,3 +48,9 @@ complex_metric:
 #Specify whatever additional tags you want
   tags:
     im_a: "tag"
+
+simple_metric:
+    type: "get",
+    oid: "1.3.6.1.2.1.1.3.0"
+    metric: "sys.uptime.{host}"
+    tags: {}
