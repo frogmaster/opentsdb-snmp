@@ -35,24 +35,8 @@ Example configuration file:
         port: 5431 #port
       -
         host: "localhost"
-    metrics_dir: "path/to/yml/files/containing/metrics"
-    metrics:
-      ifHCOutUcastPkts: #unique metric name used in (device section in hostlist file)
-        resolver: "ifname" #relevant only when walk is used
-        oid: "1.3.6.1.2.1.31.1.1.1.11"
-        metric: "interface.packets" #metric name on tsd side
-        type: "walk" #either walk or get
-        rate: True # defaults to False, whether a rate should be calculated
-        rate_rand_wraps: defaults to False. If true, datapoint is discarded, when counter wrap is detected. Useful for counters with random wraps (per/day, per/week, constant reboots etc).
-        multiply: 0.1 #default to None divide value by 10
-        min_val: minimum allowed value.
-        max_val: maximum allowed value.
-        replacement_val: value to replace out of range value from snmp. default None (metric is not sent to tsdb)
-        startidx: 123 # defaults to None. Start walking starting from this index. Note, only applies to single index oids
-        endidx: 129 # defaults to None. End walking when endidx is reached. None, only applies to single index oids
-        tags: #tags on tsd side
-          direction: "out"
-          type: "unicast"
+    metrics_dir: "path/to/yml/files/containing/metrics" #see misc/example_metrics/complex_metric1.yml for info
+    metrics: #it's cleaner to use metrics dir, but you can put metrics here
 
 
 ### hosts_file example:
@@ -135,14 +119,3 @@ index x.2 will be translated to index=x direction=out
 ### d500_xdsl
 index [x]xyy will be translated to interface [x]x/yy
 (first x is not mandatory)
-
-## Value modifiers
-Similar to resolvers, but deal with values. Currently only rate is supported. Configuration will probably change, when somebody needs something else
-
-### rate
-Used when metric has "rate: true" config option
-instead of counter32 or 64, rate is sent to tsdb. This means that script must run minimally two intervals before values are sent.
-
-
-
-
