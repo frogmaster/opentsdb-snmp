@@ -32,6 +32,7 @@ class Metric:
         self.min_val = min_val
         self.replacement_val = replacement_val
         self.rate_rand_wraps = rate_rand_wraps
+        self.ignore_zeros = ignore_zeros
 
         self.tags["host"] = self.host
 
@@ -75,8 +76,8 @@ class Metric:
         return buf
 
     def _process_dp(self, dp, poll_time, key=None):
-        if dp is None:
-            return
+        if not dp and (dp is None or self.ignore_zeros):
+            return None
         tags = self.tags.copy()
         if (key):
             resolved = self.resolver.resolve(key, device=self.device)
@@ -94,13 +95,15 @@ class Metric:
                 value=dp,
                 rate_rand_wraps=self.rate_rand_wraps
             )
-        if dp is None: return None
+        if dp is None:
+            return None
 
         if self.max_val is not None and long(dp) > long(self.max_val):
             dp = self.replacement_val
         elif self.min_val is not None and long(dp) < long(self.min_val):
             dp = self.replacement_val
-        if dp is None: return None
+        if dp is None:
+            return None
         if self.multiply:
             dp = float(dp) * self.multiply
         buf = "put {0} {1} {2} {3}".format(
