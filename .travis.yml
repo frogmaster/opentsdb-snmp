@@ -5,4 +5,7 @@ python:
 install:
     - "pip install pyyaml"
     - "python setup.py develop"
-script: nosetests
+    - "pip install coveralls"
+script: coverage run --source=opentsdb.snmp setup.py test
+after_success:
+      coveralls
