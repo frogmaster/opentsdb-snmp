@@ -31,7 +31,6 @@ setuptools.setup(
     package_data={
     },
     install_requires=[
-        "netsnmp-python",
         "pyyaml"
     ],
     tests_require=[

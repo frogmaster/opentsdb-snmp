@@ -12,6 +12,8 @@
 import time
 from nose.tools import eq_
 from mock import Mock, patch
+import sys
+sys.modules['netsnmp'] = Mock()
 from opentsdb.snmp.main import Main
 from opentsdb.snmp.device import Device
 from opentsdb.snmp.metric import Metric
