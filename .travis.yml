@@ -1,11 +1,9 @@
 language: python
 python:
     - "2.7"
-before_install:
-    - sudo apt-get install python-requests
 install:
     - "pip install pyyaml"
-    - "pip install coveralls"
+    - "pip install python-coveralls"
     - "python setup.py develop"
 script:
     coverage run --source=opentsdb.snmp setup.py test
