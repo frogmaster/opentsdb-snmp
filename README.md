@@ -1,3 +1,5 @@
+[![Coverage Status](https://coveralls.io/repos/frogmaster/opentsdb-snmp/badge.svg?branch=multiprocess)](https://coveralls.io/r/frogmaster/opentsdb-snmp?branch=multiprocess)
+
 # opentsdb-snmp
 
 Simple program to push metrics from snmp to [opentsdb](http://opentsdb.net/)
