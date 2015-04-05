@@ -35,9 +35,10 @@ Example configuration file:
         port: 5431 #port
       -
         host: "localhost"
-    metrics_dir: "path/to/yml/files/containing/metrics" #see misc/example_metrics/complex_metric1.yml for info
+    metrics_dir: "path/to/yml/files/containing/metrics" #see misc/example_metrics/complex_metric1.yml
     metrics: #it's cleaner to use metrics dir, but you can put metrics here
 
+[example_metrics_file] (misc/example_metrics/complex_metric1.yml)
 
 ### hosts_file example:
 
