@@ -20,7 +20,10 @@ Commands should be something like this, i may be forgetting something
     $ . snmpenv/bin/activate
     $ pip install pyyaml
     $ python setup.py install
+    
+# running
 
+    $ opentsdb-snmp --config=bar/conf.yml --interval=300 --readers=50 --loglevel=info --hostlist=foo/hostlist.yml
 
 # configuration
 
