@@ -29,7 +29,6 @@ class _Huawei(object):
 class HuaweiIfName(_Huawei):
     def resolve(self, index, device=None):
         tags = {
-            "index": index,
             "interface": self.index_to_name(index)
         }
         return tags
@@ -42,12 +41,14 @@ class HuaweiAfterIndex(_Huawei):
         tags["interface"] = self.index_to_name(tags["index"])
         return tags
 
+
 class HuaweiAfterIndexUsDs(_Huawei):
     def resolve(self, index, device=None):
         after_index = AfterIndex()
         tags = after_index.resolve(index, device=device, updown=True)
         tags["interface"] = self.index_to_name(tags["index"])
         return tags
+
 
 class HuaweiOnt(_Huawei):
     def resolve(self, index, device=None):
@@ -59,7 +60,6 @@ class HuaweiOnt(_Huawei):
         gemport = self.index_to_name(idx)
         tags = {
             "interface": gemport,
-            "index": index,
             "ont": ont,
         }
         if len(keys) >= 3:

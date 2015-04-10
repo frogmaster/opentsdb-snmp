@@ -31,27 +31,23 @@ class TestHuawei(object):
     def test_huawei_ifname(self):
         r = hw.HuaweiIfName()
         tags = r.resolve(4160794560, device=self.device)
-        eq_(tags["index"], 4160794560)
         eq_(tags["interface"], "0/5/63")
 
     def test_huawei_after_idx(self):
         r = hw.HuaweiAfterIndex()
         tags = r.resolve("4160794560.2", device=self.device)
-        eq_(tags["index"], 4160794560)
         eq_(tags["direction"], "out")
         eq_(tags["interface"], "0/5/63")
 
     def test_huawei_after_idx_usds(self):
         r = hw.HuaweiAfterIndexUsDs()
         tags = r.resolve("4160794560.2", device=self.device)
-        eq_(tags["index"], 4160794560)
         eq_(tags["direction"], "us")
         eq_(tags["interface"], "0/5/63")
 
     def test_huawei_ont_port(self):
         r = hw.HuaweiOnt()
         tags = r.resolve("4160794560.14.0")
-        eq_(tags["index"], "4160794560.14.0")
         eq_(tags["interface"], "0/5/63")
         eq_(tags["ont"], "14")
         eq_(tags["ontport"], "0")
@@ -59,6 +55,5 @@ class TestHuawei(object):
     def test_huawei_ont(self):
         r = hw.HuaweiOnt()
         tags = r.resolve("4160794560.14")
-        eq_(tags["index"], "4160794560.14")
         eq_(tags["interface"], "0/5/63")
         eq_(tags["ont"], "14")
