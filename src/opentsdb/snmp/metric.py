@@ -49,7 +49,7 @@ class Metric:
         if type == "walk" or type == "bulkwalk":
             self.walk = type
             if resolver not in device.resolvers:
-                raise "Resolver not found"
+                raise Exception("Resolver not found")
             self.resolver = device.resolvers[resolver]
         else:
             self.walk = False
