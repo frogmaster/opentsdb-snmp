@@ -109,7 +109,7 @@ def handle_vb(vb, expect_str):
     else:
         full_oid = vb.tag
     if vb.type == "OCTETSTR" and not expect_str:
-        if vb.val == "**" or vb.val == "####":
+        if vb.val == "**" or vb.val.find("###") >= 0:
             return (full_oid, None)
         try:
             val = float(vb.val)
