@@ -109,6 +109,12 @@ def handle_vb(vb, expect_str):
     else:
         full_oid = vb.tag
     if vb.type == "OCTETSTR" and not expect_str:
-        return (full_oid, int(vb.val.encode("hex"), 16))
+        if vb.val == "**":
+            return (full_oid, None)
+        try:
+            val = float(vb.val)
+            return (full_oid, val)
+        except ValueError:
+            return (full_oid, int(vb.val.encode("hex"), 16))
     else:
         return (full_oid,  vb.val)
