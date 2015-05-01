@@ -10,11 +10,11 @@
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
 from nose.tools import eq_, raises
-from opentsdb.snmp.resolvers.nec_paso import NECIPasoModem
+from opentsdb.snmp.resolvers.nec_paso import NECIPasoModem, NECPasoNEOModem
 
 
 class TestDevice(object):
-    def test_legit_resolver(self):
+    def test_legit_ipaso_resolver(self):
         resolver = NECIPasoModem()
         tags = resolver.resolve(16842752)
         eq_("modem1", tags["interface"])
@@ -22,6 +22,11 @@ class TestDevice(object):
         eq_("modem2", tags["interface"])
 
     @raises(Exception)
-    def test_missing_index(self):
+    def test_missing_ipaso_index(self):
         resolver = NECIPasoModem()
         tags = resolver.resolve(2345)
+
+    def test_pasoneo(self):
+        resolver = NECPasoNEOModem()
+        tags = resolver.resolve(2)
+        eq_("modem2", tags["interface"])

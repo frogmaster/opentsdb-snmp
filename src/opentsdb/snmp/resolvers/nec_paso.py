@@ -21,6 +21,13 @@ class NECIPasoModem:
 
     def resolve(self, index, device=None):
         if (int(index) in self._map):
-            interface =  self._map[int(index)]
+            interface = self._map[int(index)]
             return {"interface": interface}
         raise Exception("Missing INDEX {} in NECIPasoModem resolver".format(index))
+
+class NECPasoNEOModem:
+    def __init__(self, cache=None):
+        self.cache = cache
+
+    def resolve(self, index, device=None):
+        return {"interface": "modem{}".format(index)}

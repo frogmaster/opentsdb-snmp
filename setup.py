@@ -58,6 +58,7 @@ setuptools.setup(
             "isam_old_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamOld",
             "isam_old_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamOldOctets",
             "nec_ipaso_modem=opentsdb.snmp.resolvers.nec_paso:NECIPasoModem",
+            "nec_paso_modem=opentsdb.snmp.resolvers.nec_paso:NECPasoNEOModem",
         ],
         "value_modifiers": [
             "rate=opentsdb.snmp.value_modifiers.rate:Rate",
