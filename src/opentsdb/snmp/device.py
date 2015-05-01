@@ -11,6 +11,7 @@
 # see <http://www.gnu.org/licenses/>.
 from opentsdb.snmp.metric import Metric
 from opentsdb.snmp.snmp_session import SNMPSession
+import logging
 import time
 
 
@@ -31,9 +32,16 @@ class Device:
         self.resolvers = resolvers
         self.value_modifiers = mods
         for m in data["metrics"]:
+            logging.info("trying to initialize metric %s", m)
             if not m in metrics:
+                logging.info("WARNING: can't find metric %s for %s", m, self.hostname)
                 continue
-            metric = Metric(device=self, **metrics[m])
+            logging.info("found metric %s", m)
+            try:
+                metric = Metric(device=self, **metrics[m])
+            except Exception as e:
+                logging.info("Exception while initializing metric: %s", e)
+            logging.info("Initialized metric %s", metric.name)
             self.metrics.append(metric)
 
     def init_snmp(self):
