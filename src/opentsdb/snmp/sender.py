@@ -136,7 +136,7 @@ class TSDConnection:
 
         # try sending our data.  if an exception occurs, return False
         try:
-            self.socket.sendall(out)
+            self.socket.sendall(out+"\n")
             return True
         except socket.error, msg:
             logging.error('failed to send data: %s', msg)

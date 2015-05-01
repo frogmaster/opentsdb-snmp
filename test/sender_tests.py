@@ -76,7 +76,7 @@ class TestDSDConnection(object):
         self.tsd.socket = Mock()
         self.tsd.socket.sendall = Mock()
         self.tsd.send_data(["foo", "bar"])
-        self.tsd.socket.sendall.assert_called_with('foo\nbar')
+        self.tsd.socket.sendall.assert_called_with('foo\nbar\n')
 
 
 class TestSender(object):
@@ -90,7 +90,7 @@ class TestSender(object):
             mocksock.return_value = mocksock
             mocksock.sendall = Mock()
             self.sender.send(["foo", "bar"])
-            mocksock.sendall.assert_called_with('foo\nbar')
+            mocksock.sendall.assert_called_with('foo\nbar\n')
 
 
 class timeout:
