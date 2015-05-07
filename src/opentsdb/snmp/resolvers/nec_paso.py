@@ -18,12 +18,29 @@ class NECIPasoModem:
             16842752: "modem1",
             25231360: "modem2",
         }
+        self._errtypemap = {
+            2: "es",
+            3: "ses",
+            5: "ua",
+        }
 
     def resolve(self, index, device=None):
+        arr = str(index).split(".")
+        ret = {}
+        if len(arr) == 2:
+            if int(arr[1]) in self._errtypemap:
+                ret["type"] = self._errtypemap[int(arr[1])]
+            else:
+                return None
+            index = arr[0]
+
         if (int(index) in self._map):
-            interface = self._map[int(index)]
-            return {"interface": interface}
-        raise Exception("Missing INDEX {} in NECIPasoModem resolver".format(index))
+            ret["interface"] = self._map[int(index)]
+            return ret
+        raise Exception(
+            "Missing INDEX {} in NECIPasoModem resolver".format(index)
+        )
+
 
 class NECPasoNEOModem:
     def __init__(self, cache=None):
