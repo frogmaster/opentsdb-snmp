@@ -15,13 +15,16 @@ import logging
 
 
 class SNMPSession:
-    def __init__(self, host, community, version=2, timeout=2000000, retries=0):
+    def __init__(self, host, community,
+                 version=2, timeout=2000000,
+                 retries=0, max_repetitions=49):
         self.session = None
         self.host = host
         self.community = community
         self.version = version
         self.timeout = timeout
         self.retries = retries
+        self.max_rep = max_repetitions
 
     def connect(self):
         #resolve hostname
@@ -66,7 +69,7 @@ class SNMPSession:
 
         while (runningtreename.startswith(oid) and stop is False):
             vrs = VarList(Varbind(runningtreename, startindexpos))
-            result = self.session.getbulk(0, 50, vrs)
+            result = self.session.getbulk(0, self.max_rep, vrs)
             if self.session.ErrorInd:
                 logging.warn(
                     "walk failed on: {0} ({1})".format(

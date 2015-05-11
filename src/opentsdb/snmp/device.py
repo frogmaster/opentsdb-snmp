@@ -28,6 +28,10 @@ class Device:
             self.snmp_retries = data["snmp_retries"]
         else:
             self.snmp_retries = 0
+        if "snmp_max_repetitions" in data:
+            self.snmp_max_repetitions = data["snmp_max_repetitions"]
+        else:
+            self.snmp_max_repetitions = 49
         self.metrics = []
         self.resolvers = resolvers
         self.value_modifiers = mods
@@ -50,7 +54,8 @@ class Device:
             community=self.community,
             version=self.snmp_version,
             timeout=self.snmp_timeout,
-            retries=self.snmp_retries
+            retries=self.snmp_retries,
+            max_repetitions=self.snmp_max_repetitions
         )
         self.snmp.connect()
         return self.snmp

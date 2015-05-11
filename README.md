@@ -57,6 +57,9 @@ Example configuration file:
       hostname: "bar"
       community: "foo"
       snmp_version: 2
+      #snmp_timeout: 2000000
+      #snmp_retries: 0
+      #snmp_max_repetitions: 49
       metrics: 
         - "ifInUcastPkts"
         - ""ifOutOctets"
