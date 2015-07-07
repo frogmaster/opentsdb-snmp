@@ -113,14 +113,14 @@ class Main:
         )
         try:
             while(True):
+                #start workers
+                wm.start()
                 dev_list = self.conf.devicelist()
                 for d in dev_list:
                     self.dev_queue.put(d)
                 if (times == 0):
                     break
                 start_time = time.time()
-                #start workers
-                wm.start()
                 wm.join()
                 delta = time.time() - start_time
                 logging.info("Iteration took %d seconds", delta)
@@ -132,20 +132,25 @@ class Main:
         except (KeyboardInterrupt, SystemExit):
             wm.terminate()
 
+
 class ConfigReader:
     def __init__(self, path, hostlist=None):
         self.path = path
         self.data = self.load_file(path)
-        if hostlist:
-            self.hostlist = self.load_file(hostlist)
-        else:
-            self.hostlist = self.load_file(self.data["hosts_file"])
+        self.hostlist_filename = hostlist
+        self.hostlist = None
 
     def load_file(self, path):
         with open(path) as fp:
             return yaml.load(fp)
 
     def devicelist(self):
+        if self.hostlist:
+            return self.hostlist
+        if self.hostlist_filename:
+            self.hostlist = self.load_file(self.hostlist_filename)
+        else:
+            self.hostlist = self.load_file(self.data["hosts_file"])
         return self.hostlist
 
     def metrics(self):
@@ -186,7 +191,7 @@ def r_worker(args):
         length = len(data)
         step = 300
         for i in xrange(0, length, step):
-            send_queue.put(data[i:i+step])
+            send_queue.put(data[i:i + step])
     except Exception:
         print('Caught exception in worker thread:')
         traceback.print_exc()
