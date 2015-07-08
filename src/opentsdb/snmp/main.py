@@ -146,7 +146,7 @@ class ConfigReader:
 
     def load_file(self, path):
         with open(path) as fp:
-            return load(fp, loader=Loader)
+            return load(fp, Loader=Loader)
 
     def devicelist(self):
         if self.hostlist:
