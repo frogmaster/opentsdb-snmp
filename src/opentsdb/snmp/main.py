@@ -14,7 +14,11 @@ import multiprocessing
 from pkg_resources import iter_entry_points
 from opentsdb.snmp.device import Device
 from opentsdb.snmp.worker import WorkerManager
-import yaml
+from yaml import load
+try:
+    from yaml import CLoader as Loader
+except ImportError:
+    from yaml import Loader
 import argparse
 import logging
 import traceback
@@ -142,7 +146,7 @@ class ConfigReader:
 
     def load_file(self, path):
         with open(path) as fp:
-            return yaml.load(fp)
+            return load(fp, loader=Loader)
 
     def devicelist(self):
         if self.hostlist:
