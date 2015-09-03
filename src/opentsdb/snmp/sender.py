@@ -27,7 +27,7 @@ class Sender(object):
     def init_tsd(self):
         while (not self.tsd or not self.tsd.verify()):
             (host, port) = next(self.tsd_cycle)
-            logging.debug("Using tsd: %s:%d", host, port)
+            logging.debug("Using tsd: %s:%s", host, port)
             self.tsd = TSDConnection(host, port)
             self.tsd.connect()
             time.sleep(1)
@@ -73,12 +73,14 @@ class TSDConnection:
         self.socket = self._get_connected_socket()
         if self.socket:
             return True
+        logging.debug("No socket to tsd")
         return False
 
     def verify(self):
         """Periodically verify that our connection to the TSD is OK
         and that the TSD is alive/working."""
         if self.socket is None:
+            logging.debug("socket to tsd is no longer open")
             return False
 
         # if the last verification was less than a minute ago, don't re-verify
@@ -92,6 +94,7 @@ class TSDConnection:
             self.socket.sendall('version\n')
         except socket.error:
             self.socket = None
+            logging.debug('socket error to tsd when trying to get tsd version')
             return False
 
         bufsize = 4096
@@ -104,12 +107,14 @@ class TSDConnection:
                 buf = self.socket.recv(bufsize)
             except socket.error:
                 self.socket = None
+                logging.debug('socket closed after recv(bufsize)')
                 return False
 
             # If we don't get a response to the `version' request, the TSD
             # must be dead or overloaded.
             if not buf:
                 self.socket = None
+                logging.debug('no buffer read from tsd')
                 return False
 
             # Woah, the TSD has a lot of things to tell us...  Let's make

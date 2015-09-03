@@ -41,7 +41,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "-l", "--loglevel", dest="loglevel", default="info",
-    help="Number of times to loop"
+    help="Log level, defaults to 'info'"
 )
 parser.add_argument(
     "-f", "--hostlist", dest="hostlist", default=False,
