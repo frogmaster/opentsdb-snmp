@@ -2,6 +2,8 @@ hosts_file: "misc/sample_hostlist.yml"
 tsd:
   - host: "localhost"
     port: "4242"
+  - host: "tsdb.example.com"
+    port: "5431"
 metrics_dir: "./misc/example_metrics/"
 metrics:
   ifHCOutUcastPkts:

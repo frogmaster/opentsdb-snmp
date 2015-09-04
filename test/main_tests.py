@@ -31,7 +31,7 @@ class TestConfigReader(object):
 
     def test_tsd_list(self):
         tsd_list = self.hlr.tsd_list()
-        ok_(tsd_list[0], ('localhost', 5431))
+        ok_(tsd_list[0], ('tsdb.example.com', 5431))
         ok_(tsd_list[1], ('localhost', 4242))
 
 
