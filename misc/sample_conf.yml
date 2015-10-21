@@ -5,6 +5,8 @@ tsd:
     port: 5431
   -
     host: "localhost"
+  - host: "localhost"
+    port: "4242"
 metrics_dir: "./misc/example_metrics/"
 metrics:
   ifHCOutUcastPkts:

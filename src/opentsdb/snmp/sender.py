@@ -91,6 +91,10 @@ class TSDConnection:
         try:
             self.socket.sendall('version\n')
         except socket.error:
+            try:
+                self.socket.close()
+            except socket.error:
+                pass
             self.socket = None
             return False
 
@@ -103,12 +107,20 @@ class TSDConnection:
             try:
                 buf = self.socket.recv(bufsize)
             except socket.error:
+                try:
+                    self.socket.close()
+                except socket.error:
+                    pass
                 self.socket = None
                 return False
 
             # If we don't get a response to the `version' request, the TSD
             # must be dead or overloaded.
             if not buf:
+                try:
+                    self.socket.close()
+                except socket.error:
+                    pass
                 self.socket = None
                 return False
 
