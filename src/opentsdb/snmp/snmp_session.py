@@ -31,6 +31,7 @@ class SNMPSession:
         try:
             ip = gethostbyname(self.host)
         except:
+            logging.debug('Could not resolve', self.host, 'connection failed')
             self.session = None
             return None
         self.session = Session(
