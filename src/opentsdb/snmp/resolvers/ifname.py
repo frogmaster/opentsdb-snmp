@@ -26,10 +26,14 @@ class IfName:
         snmp = device.snmp
         hostname = device.hostname
         c_key = "IfName_" + hostname
-        if c_key not in self.cache:
+        if c_key not in self.cache or index not in self.cache[c_key]:
             self.cache[c_key] = self.get_ifnames(snmp)
+
         if index in self.cache[c_key]:
             return {"interface": self.cache[c_key][index]}
         else:
-            logging.debug("IfName Cache miss: %s %s not in %s",
-                          hostname, index, hostname)
+            logging.warning(
+                "IfName Cache miss: %s %s not in %s, \
+                even after cache is flushed",
+                hostname, index, hostname
+            )
