@@ -22,18 +22,26 @@ class IfName:
             raise Exception("SNMP walk failed")
         return data
 
+    def get_ifname(self, snmp, key):
+        data = snmp.get('.1.3.6.1.2.1.31.1.1.1.1.{}'.format(key))
+        return data
+
     def resolve(self, index, device=None):
         snmp = device.snmp
         hostname = device.hostname
         c_key = "IfName_" + hostname
-        if c_key not in self.cache or index not in self.cache[c_key]:
+        if c_key not in self.cache:
             self.cache[c_key] = self.get_ifnames(snmp)
 
-        if index in self.cache[c_key]:
-            return {"interface": self.cache[c_key][index]}
-        else:
-            logging.warning(
-                "IfName Cache miss: %s %s not in %s, \
-                even after cache is flushed",
-                hostname, index, hostname
-            )
+        if index not in self.cache[c_key]:
+            name = self.get_ifname(snmp, index)
+            if (name):
+                self.cache[c_key][index] = name
+            else:
+                logging.warning(
+                    "Failed fetch ifname for {} index {}"
+                    .format(hostname, index)
+                )
+                return
+
+        return {"interface": self.cache[c_key][index]}

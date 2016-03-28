@@ -20,6 +20,7 @@ class ifname_tests(object):
         self.device.hostname = "foobar"
         self.device.snmp = Mock()
         self.device.snmp.walk = Mock(return_value={"1": "eth0", "2": "eth1"})
+        self.device.snmp.get = Mock(return_value="eth2")
 
     def test_resolve(self):
         r = IfName(dict())
