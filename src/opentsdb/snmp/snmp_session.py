@@ -104,8 +104,10 @@ class SNMPSession:
         return ret
 
     def get(self, oid):
+        vb = Varbind(oid)
+        vl = VarList(vb)
         try:
-            val = self.session.get(oid)[0]
+            val = self.session.get(vl)[0]
         except Exception:
             logging.warning(
                 "get failed on: {0} {1} ({2})".format(
