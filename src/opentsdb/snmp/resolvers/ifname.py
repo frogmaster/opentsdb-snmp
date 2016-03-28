@@ -33,6 +33,9 @@ class IfName:
         if c_key not in self.cache:
             self.cache[c_key] = self.get_ifnames(snmp)
 
+        if not index:
+            return None
+
         if index not in self.cache[c_key]:
             name = self.get_ifname(snmp, index)
             if (name):
@@ -42,6 +45,6 @@ class IfName:
                     "Failed fetch ifname for {} index {}"
                     .format(hostname, index)
                 )
-                return
+                return None
 
         return {"interface": self.cache[c_key][index]}

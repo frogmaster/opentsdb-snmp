@@ -72,14 +72,14 @@ class SNMPSession:
             vrs = VarList(Varbind(runningtreename, startindexpos))
             result = self.session.getbulk(0, self.max_rep, vrs)
             if self.session.ErrorInd:
-                logging.warn(
+                logging.warning(
                     "walk failed on: {0} ({1})".format(
                         self.host, self.session.ErrorStr
                     )
                 )
             key = None
             if not result:
-		logging.warn("got no result: %s %s", self.host, oid)
+		logging.warning("got no result: %s %s", self.host, oid)
                 break
             """ Print output from running getbulk"""
             for i in vrs:
@@ -104,7 +104,16 @@ class SNMPSession:
         return ret
 
     def get(self, oid):
-        return self.session.get(oid)[0]
+        try:
+            val = self.session.get(oid)[0]
+        except Exception:
+            logging.warning(
+                "get failed on: {0} {1} ({2})".format(
+                    self.host, oid, self.session.ErrorStr
+                )
+            )
+            return None
+        return val
 
 
 def handle_vb(vb, expect_str):
