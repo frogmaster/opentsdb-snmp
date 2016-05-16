@@ -132,6 +132,7 @@ class Main:
         except (KeyboardInterrupt, SystemExit):
             wm.terminate()
 
+
 class ConfigReader:
     def __init__(self, path, hostlist=None):
         self.path = path
@@ -178,16 +179,4 @@ class ConfigReader:
         return tsd_list
 
 
-def r_worker(args):
-    device = args[0]
-    send_queue = args[1]
-    try:
-        data = device.poll()
-        length = len(data)
-        step = 300
-        for i in xrange(0, length, step):
-            send_queue.put(data[i:i+step])
-    except Exception:
-        print('Caught exception in worker thread:')
-        traceback.print_exc()
-        print()
+
