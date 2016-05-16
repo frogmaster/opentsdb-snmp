@@ -12,6 +12,7 @@ metrics:
     metric: "interface.packets"
     type: "walk"
     rate: true
+    ignore_zeros: true
     tags:
       direction: "out"
       type: "unicast"

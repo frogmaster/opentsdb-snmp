@@ -30,9 +30,5 @@ class ifname_tests(object):
         self.device.snmp.walk = Mock(side_effect=Exception())
         eq_("eth0", ret["interface"])
         eq_("eth1", r.resolve("2", self.device)["interface"])
-
-        #flush the cache, when there's cache miss
-        self.device.snmp.walk = Mock(
-            return_value={"1": "eth0", "2": "eth1", "3": "eth2"}
-        )
         eq_("eth2", r.resolve("3", self.device)["interface"])
+        eq_("eth1", r.resolve("2", self.device)["interface"])

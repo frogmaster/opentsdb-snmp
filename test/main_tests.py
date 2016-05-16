@@ -34,6 +34,11 @@ class TestConfigReader(object):
         ok_(tsd_list[0], ('tsdb.example.com', 5431))
         ok_(tsd_list[1], ('localhost', 4242))
 
+    def test_metrics(self):
+        metrics = self.hlr.metrics()
+        m = metrics["ifHCOutUcastPkts"]
+        ok_(m["ignore_zeros"] == True)
+
 
 class TestMain(object):
     def setup(self):

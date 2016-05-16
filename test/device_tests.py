@@ -129,6 +129,18 @@ class TestMetric(object):
 
         eq_(3, len(result))
 
+    def test_opentsdb_walk_metric_with_ignore_zeros(self):
+        mdata = self.walkmetric
+        mdata["ignore_zeros"] = True
+        mdata["device"] = self.mockdevice
+        m = Metric(
+            **mdata
+        )
+        walkdata = m._get_walk(self.mockdevice.snmp)
+        result = m._process_walk_data(walkdata, self.time)
+
+        eq_(2, len(result))
+
     @patch('time.time')
     def test_opentsdb_get_metric(self, mocktime):
         mocktime.return_value = self.time
