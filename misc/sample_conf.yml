@@ -7,7 +7,6 @@ tsd:
     host: "localhost"
   - host: "localhost"
     port: "4242"
->>>>>>> 3a511e8... try to close socket before setting it to None
 metrics_dir: "./misc/example_metrics/"
 metrics:
   ifHCOutUcastPkts:

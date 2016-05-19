@@ -46,7 +46,7 @@ class TestMetric(object):
         snmp.bulkwalk = Mock(return_value={
             "1": 10,
             "2": 20,
-            "3": 0,
+            "3": "0",
         })
         snmp.get = Mock(return_value=123)
         self.time = time.time()
@@ -79,7 +79,7 @@ class TestMetric(object):
         walkdata = m._get_walk(self.mockdevice.snmp)
         eq_(10, walkdata["1"])
         eq_(20, walkdata["2"])
-        eq_(0,  walkdata["3"])
+        eq_("0",  walkdata["3"])
         eq_(
             "put interface.packets.in.foo "
             + str(int(self.time)) +
