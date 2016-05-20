@@ -77,7 +77,6 @@ class Metric:
 
     def _process_dp(self, dp, poll_time, key=None):
         if dp is None or (self.ignore_zeros and int(dp) == 0):
-            logging.debug("hit none")
             return None
         tags = self.tags.copy()
         if (key):
