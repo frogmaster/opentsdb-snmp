@@ -20,7 +20,9 @@ class IsamNFXSA(object):
         bstr = "{:032b}".format(int(index))
         slot = int(bstr[1:7], 2)
         port = int(bstr[11:19], 2) + 1
-        if slot < 10:
+        if str(bstr[0:6]) == "000000":
+            slot = 1
+        elif slot < 10:
             slot = slot - 1
         else:
             slot = slot + 2

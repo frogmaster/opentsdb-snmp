@@ -40,11 +40,14 @@ class TestISAM(object):
     def test_IsamNFXSA_resolver(self):
         resolver = IsamNFXSA()
         testdata = [
-            {"index": "67231744", "expected": "1/1/1/16"},
+            {"index": "67108864",  "expected": "1/1/1/1"},
+            {"index": "67231744",  "expected": "1/1/1/16"},
             {"index": "101048320", "expected": "1/1/2/48"},
             {"index": "302333952", "expected": "1/1/8/43"},
             {"index": "335929344", "expected": "1/1/12/48"},
             {"index": "570425344", "expected": "1/1/19/1"},
+            {"index": "46194688",  "expected": "1/1/1/8"},
+            {"index": "33554432",  "expected": "1/1/1/1"},
         ]
 
         for item in testdata:
