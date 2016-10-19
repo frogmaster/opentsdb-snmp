@@ -31,7 +31,7 @@ class SNMPSession:
         try:
             ip = gethostbyname(self.host)
         except:
-            logging.debug('Could not resolve', self.host, 'connection failed')
+            logging.debug('Could not resolve {}'.format(self.host))
             self.session = None
             return None
         self.session = Session(
@@ -79,7 +79,9 @@ class SNMPSession:
                 )
             key = None
             if not result:
-		logging.warning("got no result: %s %s", self.host, oid)
+                logging.warning(
+                    "got no result: {} {}".format(self.host, oid)
+                )
                 break
             """ Print output from running getbulk"""
             for i in vrs:
