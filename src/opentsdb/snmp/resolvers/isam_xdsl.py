@@ -12,6 +12,65 @@
 import logging
 
 
+class NFXSAcard(object):
+    def __init__(self, cache=None):
+        self.cache = cache
+
+    def resolve(self, index, device=None):
+        bstr = "{:16b}".format(int(index))
+        rack = int(bstr[0:4], 2)
+        shelf = int(bstr[4:8], 2)
+        slot = int(bstr[8:16], 2)
+
+        if (rack == 1 and shelf == 1):
+            if (slot == 0):
+                return {"card": "acu:1/1"}
+            if (slot == 1):
+                return {"card": "nt-a"}
+            if (slot == 2):
+                return {"card": "nt-b"}
+        else:
+           if (slot == 0):
+                return {"card": "acu:{}/{}".format(rack, shelf)}
+           if (slot == 1):
+                return {"card": "ctrl:{}/{}".format(rack, shelf)}
+
+        if slot < 11:
+            slot = slot - 2
+        else:
+            slot = slot + 1
+        card = "{0}/{1}/{2}".format(rack, shelf, slot)
+        return {"card": card}
+
+
+class NFXSBcard(object):
+    def __init__(self, cache=None):
+        self.cache = cache
+
+    def resolve(self, index, device=None):
+        bstr = "{:16b}".format(int(index))
+        rack = int(bstr[0:4], 2)
+        shelf = int(bstr[4:8], 2)
+        slot = int(bstr[8:16], 2)
+
+        if (rack == 1 and shelf == 1):
+            if (slot == 0):
+                return {"card": "acu:1/1"}
+            if (slot == 1):
+                return {"card": "nt-a"}
+            if (slot == 2):
+                return {"card": "nt-b"}
+        else:
+           if (slot == 0):
+                return {"card": "acu:{}/{}".format(rack, shelf)}
+           if (slot == 1):
+                return {"card": "ctrl:{}/{}".format(rack, shelf)}
+
+        slot = slot + 1
+        card = "{0}/{1}/{2}".format(rack, shelf, slot)
+        return {"card": card}
+
+
 class IsamNFXSA(object):
     def __init__(self, cache=None):
         self.cache = cache
@@ -101,8 +160,6 @@ class IsamOld(object):
 class Dot1dBasePortIfIndex(object):
     def __init__(self, cache=None):
         self.cache = cache
-        if "ISAMOCTETS" not in self.cache:
-            self.cache["ISAMOCTETS"] = dict()
 
     def get_dot1dbaseport(self, snmp):
         data = snmp.walk('.1.3.6.1.2.1.17.1.4.1.2')

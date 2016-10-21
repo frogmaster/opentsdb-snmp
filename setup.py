@@ -52,6 +52,8 @@ setuptools.setup(
             "huawei_ont_port=opentsdb.snmp.resolvers.huawei:HuaweiOnt",
             "d500_xdsl=opentsdb.snmp.resolvers.d500_xdsl:D500_xdsl",
             "isam_nfxsa_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSA",
+            "isam_nfxsa_card=opentsdb.snmp.resolvers.isam_xdsl:NFXSAcard",
+            "isam_nfxsb_card=opentsdb.snmp.resolvers.isam_xdsl:NFXSBcard",
             "isam_nfxsa_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSAOctets",
             "isam_nfxsb_xdsl=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSB",
             "isam_nfxsb_octets=opentsdb.snmp.resolvers.isam_xdsl:IsamNFXSBOctets",
