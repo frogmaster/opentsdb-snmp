@@ -17,6 +17,8 @@ class NECIPasoModem:
         self._map = {
             16842752: "modem1",
             25231360: "modem2",
+	    33619968: "modem3",
+	    42008576: "modem4",
         }
         self._errtypemap = {
             2: "es",
