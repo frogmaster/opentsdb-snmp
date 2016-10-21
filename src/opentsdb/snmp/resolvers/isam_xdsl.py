@@ -12,35 +12,56 @@
 import logging
 
 
+def calc_card_name(index):
+    bstr = "{:16b}".format(int(index))
+    rack = int(bstr[0:4], 2)
+    shelf = int(bstr[4:8], 2)
+    slot = int(bstr[8:16], 2)
+
+    ret = dict(
+        rack=rack,
+        shelf=shelf,
+        slot=slot,
+        name=None,
+    )
+
+    if (rack == 1 and shelf == 1):
+        if (slot == 0):
+            ret["name"] = "acu:1/1"
+        elif (slot == 1):
+            ret["name"] = "nt-a"
+        elif (slot == 2):
+            ret["name"] = "nt-b"
+    else:
+        if (slot == 0):
+            ret["name"] = "acu:{}/{}".format(rack, shelf)
+        elif (slot == 1):
+            ret["name"] = "ctrl:{}/{}".format(rack, shelf)
+
+    return ret
+
+
 class NFXSAcard(object):
     def __init__(self, cache=None):
         self.cache = cache
 
     def resolve(self, index, device=None):
-        bstr = "{:16b}".format(int(index))
-        rack = int(bstr[0:4], 2)
-        shelf = int(bstr[4:8], 2)
-        slot = int(bstr[8:16], 2)
+        keys = str(index).split(".")
+        result = calc_card_name(keys[0])
+        tags = dict(card=None)
 
-        if (rack == 1 and shelf == 1):
-            if (slot == 0):
-                return {"card": "acu:1/1"}
-            if (slot == 1):
-                return {"card": "nt-a"}
-            if (slot == 2):
-                return {"card": "nt-b"}
-        else:
-           if (slot == 0):
-                return {"card": "acu:{}/{}".format(rack, shelf)}
-           if (slot == 1):
-                return {"card": "ctrl:{}/{}".format(rack, shelf)}
+        if len(keys) == 2:
+            tags["index"] = keys[1]
 
-        if slot < 11:
-            slot = slot - 2
+        if result["name"] is not None:
+            tags["card"] = result["name"]
         else:
-            slot = slot + 1
-        card = "{0}/{1}/{2}".format(rack, shelf, slot)
-        return {"card": card}
+            if result["slot"] < 11:
+                result["slot"] -= 2
+            else:
+                result["slot"] += 1
+            tags["card"] = "{rack}/{shelf}/{slot}".format(**result)
+        return tags
 
 
 class NFXSBcard(object):
@@ -48,27 +69,19 @@ class NFXSBcard(object):
         self.cache = cache
 
     def resolve(self, index, device=None):
-        bstr = "{:16b}".format(int(index))
-        rack = int(bstr[0:4], 2)
-        shelf = int(bstr[4:8], 2)
-        slot = int(bstr[8:16], 2)
+        keys = str(index).split(".")
+        result = calc_card_name(keys[0])
+        tags = dict(card=None)
 
-        if (rack == 1 and shelf == 1):
-            if (slot == 0):
-                return {"card": "acu:1/1"}
-            if (slot == 1):
-                return {"card": "nt-a"}
-            if (slot == 2):
-                return {"card": "nt-b"}
+        if len(keys) == 2:
+            tags["index"] = keys[1]
+
+        if result["name"]:
+            tags["card"] = result["name"]
         else:
-           if (slot == 0):
-                return {"card": "acu:{}/{}".format(rack, shelf)}
-           if (slot == 1):
-                return {"card": "ctrl:{}/{}".format(rack, shelf)}
-
-        slot = slot + 1
-        card = "{0}/{1}/{2}".format(rack, shelf, slot)
-        return {"card": card}
+            result["slot"] += 1
+            tags["card"] = "{rack}/{shelf}/{slot}".format(**result)
+        return tags
 
 
 class IsamNFXSA(object):

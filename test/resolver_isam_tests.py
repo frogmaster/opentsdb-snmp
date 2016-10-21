@@ -9,7 +9,7 @@
 # General Public License for more details.  You should have received a copy
 # of the GNU Lesser General Public License along with this program.  If not,
 # see <http://www.gnu.org/licenses/>.
-from nose.tools import eq_, raises
+from nose.tools import eq_, raises, ok_
 import opentsdb.snmp.resolvers.isam_xdsl as i
 from mock import Mock
 
@@ -46,6 +46,10 @@ class TestISAM(object):
         for item in testdata:
             tags = resolver.resolve(item["index"])
             eq_(item["expected"], tags["card"])
+
+        tags = resolver.resolve("4360.1")
+        ok_(tags["card"] == "1/1/6")
+        ok_(tags["index"] == "1")
 
     def test_NFXSBcard_resolver(self):
         resolver = i.NFXSBcard()
@@ -84,6 +88,10 @@ class TestISAM(object):
         for item in testdata:
             tags = resolver.resolve(item["index"])
             eq_(item["expected"], tags["card"])
+
+        tags = resolver.resolve("4355.1")
+        ok_(tags["card"] == "1/1/4")
+        ok_(tags["index"] == "1")
 
     def test_IsamNFXSB_resolver(self):
         resolver = i.IsamNFXSB()
