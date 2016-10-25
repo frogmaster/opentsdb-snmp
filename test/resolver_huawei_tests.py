@@ -57,3 +57,21 @@ class TestHuawei(object):
         tags = r.resolve("4160794560.14")
         eq_(tags["interface"], "0/5/63")
         eq_(tags["ont"], "14")
+
+    def test_huawei_sys(self):
+        r = hw.HuaweiAfterIndexSys()
+        tags = r.resolve("0.0.1")
+        eq_(tags["card"], "0/0")
+        eq_(tags["type"], "cpu")
+        tags = r.resolve("0.0.2")
+        eq_(tags, None)
+        tags = r.resolve("0.7.3")
+        eq_(tags["card"], "0/7")
+        eq_(tags["type"], "mem")
+
+    def test_huawei_temp(self):
+        r = hw.HuaweiTemperature()
+        tags = r.resolve("0.0")
+        eq_(tags["card"], "0/0")
+        tags = r.resolve("0.10")
+        eq_(tags["card"], "0/10")

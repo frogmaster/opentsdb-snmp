@@ -50,6 +50,28 @@ class HuaweiAfterIndexUsDs(_Huawei):
         return tags
 
 
+class HuaweiAfterIndexSys(_Huawei):
+    def resolve(self, index, device=None):
+        (frame, slot, res) = index.split(".")
+        tags = dict()
+        tags["card"] = "{}/{}".format(frame, slot)
+        if (int(res) == 1):
+            tags["type"] = "cpu"
+        elif (int(res) == 2):
+            return None
+        elif (int(res) == 3):
+            tags["type"] = "mem"
+        return tags
+
+
+class HuaweiTemperature(_Huawei):
+    def resolve(self, index, device=None):
+        (frame, slot) = index.split(".")
+        tags = dict()
+        tags["card"] = "{}/{}".format(frame, slot)
+        return tags
+
+
 class HuaweiOnt(_Huawei):
     def resolve(self, index, device=None):
         #there may be 3 keys or 2 keys, ifindex is first, ont second
