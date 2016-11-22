@@ -31,7 +31,7 @@ metrics:
   ifHCOutOctets:
     resolver: "ifname"
     oid: ".1.3.6.1.2.1.31.1.1.1.10"
-    metric: "inferface.octets"
+    metric: "interface.octets"
     type: "walk"
     rate: true
     tags:
@@ -57,7 +57,7 @@ metrics:
   ifOutOctets:
     resolver: "ifname"
     oid: ".1.3.6.1.2.1.2.2.1.16"
-    metric: "inferface.octets"
+    metric: "interface.octets"
     type: "walk"
     rate: true
     tags:
@@ -125,7 +125,7 @@ metrics:
   ifHCInOctets:
     resolver: "ifname"
     oid: ".1.3.6.1.2.1.31.1.1.1.6"
-    metric: "inferface.octets"
+    metric: "interface.octets"
     type: "walk"
     rate: true
     tags:
