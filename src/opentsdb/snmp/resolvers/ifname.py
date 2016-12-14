@@ -11,6 +11,8 @@
 # see <http://www.gnu.org/licenses/>.
 import logging
 
+LOG = logging.getLogger("opentsdb-snmp")
+
 
 class IfName:
     def __init__(self, cache=None):
@@ -37,14 +39,17 @@ class IfName:
             return None
 
         if index not in self.cache[c_key]:
+            LOG.debug("CachedMissing: {} index: {} ".format(c_key, index))
             name = self.get_ifname(snmp, index)
             if (name):
-                self.cache[c_key][index] = name
+                names = self.cache[c_key]
+                names[str(index)] = name
+                self.cache[c_key] = names
+                LOG.debug("Got name: {} for :index: {} ".format(name, index))
             else:
-                logging.warning(
-                    "Failed fetch ifname for {} index {}"
+                LOG.warning(
+                    "Failed to fetch ifname for {} index {}"
                     .format(hostname, index)
                 )
                 return None
-
         return {"interface": self.cache[c_key][index]}
