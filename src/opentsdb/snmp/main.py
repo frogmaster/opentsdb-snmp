@@ -21,10 +21,9 @@ except ImportError:
     from yaml import Loader
 import argparse
 import logging
-import traceback
 import os
-# DEFAULT_LOG = '/var/log/tcollector.log'
-# LOG = logging.getLogger('tcollector')
+
+LOG = logging.getLogger('opentsdb-snmp')
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
@@ -123,11 +122,11 @@ class Main:
                 if (times == 0):
                     break
                 start_time = time.time()
-                #start workers
+                # start workers
                 wm.start()
                 wm.join()
                 delta = time.time() - start_time
-                logging.info("Iteration took %d seconds", delta)
+                LOG.info("Iteration took %d seconds", delta)
                 if delta < self.interval:
                     time.sleep(self.interval - delta)
                 if (times > 0):
@@ -181,6 +180,3 @@ class ConfigReader:
                 port = tsd["port"]
             tsd_list.append((tsd["host"], port))
         return tsd_list
-
-
-
