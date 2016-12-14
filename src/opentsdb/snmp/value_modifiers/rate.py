@@ -20,7 +20,7 @@ class Rate:
         key = "rate_" + key
         new = {'ts': ts, 'value': float(value)}
         if not key in self.cache:
-            logging.debug("Cache miss for %s", key)
+            logging.debug("RATE: Cache miss for %s", key)
             self.cache[key] = new
             return None
         old = self.cache[key]

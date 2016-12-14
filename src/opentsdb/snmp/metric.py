@@ -14,6 +14,8 @@ import logging
 from string import Formatter
 import copy
 
+LOG = logging.getLogger("opentsdb-snmp")
+
 
 class Metric:
     'Metric class'
@@ -33,7 +35,6 @@ class Metric:
         self.replacement_val = replacement_val
         self.rate_rand_wraps = rate_rand_wraps
         self.ignore_zeros = ignore_zeros
-
         self.tags["host"] = self.host
 
         if multiply:
@@ -89,6 +90,7 @@ class Metric:
         tagstr = self._tags_to_str(tags)
         ts = time.time()
         if self.value_modifier:
+            LOG.debug("{} has value_modifier".format(self.name))
             dp = self.value_modifier.modify(
                 key=metric + tagstr,
                 ts=ts,
