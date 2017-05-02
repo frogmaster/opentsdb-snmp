@@ -111,6 +111,18 @@ class TestISAM(object):
             tags = resolver.resolve(item["index"])
             eq_(item["expected"], tags["interface"])
 
+    def test_Isam56NFXSB_resolver(self):
+        resolver = i.Isam56NFXSB()
+        testdata = [
+            {"index": "1080040960", "expected": "1/1/5/16"},
+            {"index": "1077960192", "expected": "1/1/4/48"},
+            {"index": "1077957120", "expected": "1/1/4/42"},
+        ]
+
+        for item in testdata:
+            tags = resolver.resolve(item["index"])
+            eq_(item["expected"], tags["interface"])
+
     def test_IsamNFXSA_resolver(self):
         resolver = i.IsamNFXSA()
         testdata = [
@@ -128,6 +140,23 @@ class TestISAM(object):
             tags = resolver.resolve(item["index"])
             eq_(item["expected"], tags["interface"])
 
+    def test_Isam56NFXSA_resolver(self):
+        resolver = i.Isam56NFXSA()
+        testdata = [
+            {"index": "1077938176", "expected": "1/1/1/5"},
+            {"index": "1080049152", "expected": "1/1/2/32"},
+            {"index": "1084238848", "expected": "1/1/4/23"},
+            {"index": "1086325760", "expected": "1/1/5/3"},
+            {"index": "1092640256", "expected": "1/1/8/48"},
+            {"index": "1098929152", "expected": "1/1/14/43"},
+            {"index": "1107558400", "expected": "1/1/18/1"},
+            {"index": "1094713856", "expected": "1/1/12/2"},
+        ]
+
+        for item in testdata:
+            tags = resolver.resolve(item["index"])
+            eq_(item["expected"], tags["interface"])
+
     def test_IsamNFXSBOctets_resolver(self):
         resolver = i.IsamNFXSBOctets()
         testdata = [
@@ -139,11 +168,33 @@ class TestISAM(object):
             eq_(item["expected"], tags["interface"])
             eq_(101, tags["vlan"])
 
+    def test_Isam56NFXSBOctets_resolver(self):
+        resolver = i.Isam56NFXSBOctets()
+        testdata = [
+            {"index": "1080835072.101", "expected": "1/1/5/31"},
+            {"index": "1078723072.101", "expected": "1/1/4/2"},
+        ]
+        for item in testdata:
+            tags = resolver.resolve(item["index"])
+            eq_(item["expected"], tags["interface"])
+            eq_(101, tags["vlan"])
+
     def test_IsamNFXSAOctets_resolver(self):
         resolver = i.IsamNFXSAOctets()
         testdata = [
             {"index": "67231744.101", "expected": "1/1/1/16"},
             {"index": "570425344.101", "expected": "1/1/19/1"},
+        ]
+        for item in testdata:
+            tags = resolver.resolve(item["index"])
+            eq_(item["expected"], tags["interface"])
+            eq_(101, tags["vlan"])
+
+    def test_Isam56NFXSAOctets_resolver(self):
+        resolver = i.Isam56NFXSAOctets()
+        testdata = [
+            {"index": "1085028928.101", "expected": "1/1/4/30"},
+            {"index": "1108082688.101", "expected": "1/1/18/1"},
         ]
         for item in testdata:
             tags = resolver.resolve(item["index"])

@@ -103,6 +103,25 @@ class IsamNFXSA(object):
         return {"interface": interface}
 
 
+class Isam56NFXSA(object):
+    def __init__(self, cache=None):
+        self.cache = cache
+
+    def resolve(self, index, device=None):
+        bstr = "{:032b}".format(int(index))
+        slot = int(bstr[4:11], 2)
+        port = int(bstr[16:23], 2) + 1
+        if str(bstr[0:6]) == "000000":
+            slot = 1
+        elif slot < 10:
+            slot = slot - 1
+        else:
+            slot = slot + 2
+
+        interface = "1/1/{0}/{1}".format(slot, port)
+        return {"interface": interface}
+
+
 class IsamNFXSB(object):
     def __init__(self, cache=None):
         self.cache = cache
@@ -118,6 +137,28 @@ class IsamNFXSB(object):
             rack = 1
             shelf = 1
             slot = int(bstr[1:7], 2) + 2
+        else:
+            shelf += 1
+            slot += 1
+
+        interface = "{0}/{1}/{2}/{3}".format(rack, shelf, slot, port)
+        return {"interface": interface}
+
+
+class Isam56NFXSB(object):
+    def __init__(self, cache=None):
+        self.cache = cache
+
+    def resolve(self, index, device=None):
+        bstr = "{:032b}".format(int(index))
+        rack = int(bstr[4:8], 2)
+        shelf = int(bstr[8:10], 2)
+        slot = int(bstr[10:11], 2)
+        port = int(bstr[16:23], 2) + 1
+        if rack <= 1:
+            rack = 1
+            shelf = 1
+            slot = int(bstr[4:11], 2) + 2
         else:
             shelf += 1
             slot += 1
@@ -146,10 +187,26 @@ class IsamNFXSAOctets(_SplitIndexVlan):
         return tags
 
 
+class Isam56NFXSAOctets(_SplitIndexVlan):
+    def resolve(self, index, device=None):
+        tags = super(Isam56NFXSAOctets, self).resolve(index, device)
+        interface_tags = Isam56NFXSA().resolve(tags["index"], device)
+        tags.update(interface_tags)
+        return tags
+
+
 class IsamNFXSBOctets(_SplitIndexVlan):
     def resolve(self, index, device=None):
         tags = super(IsamNFXSBOctets, self).resolve(index, device)
         interface_tags = IsamNFXSB().resolve(tags["index"], device)
+        tags.update(interface_tags)
+        return tags
+
+
+class Isam56NFXSBOctets(_SplitIndexVlan):
+    def resolve(self, index, device=None):
+        tags = super(Isam56NFXSBOctets, self).resolve(index, device)
+        interface_tags = Isam56NFXSB().resolve(tags["index"], device)
         tags.update(interface_tags)
         return tags
 
