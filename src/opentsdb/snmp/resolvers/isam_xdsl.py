@@ -118,8 +118,8 @@ class Isam56NFXSA(object):
         else:
             slot = slot + 2
 
-    interface = "1/1/{0}/{1}".format(slot, port)
-    return {"interface": interface}
+        interface = "1/1/{0}/{1}".format(slot, port)
+        return {"interface": interface}
 
 
 class IsamNFXSB(object):
